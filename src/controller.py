@@ -6,20 +6,12 @@ from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
-# global _TRAJECTORY, _DIRECTION 
-# _TRAJECTORY = []
-# _DIRECTION = []
 
-# def trajectory_callback(data):
-#     global _TRAJECTORY, _DIRECTION
-#     converted_trajectory = (np.array(data.trajectory)).reshape(-1, 3).tolist()
-#     rospy.loginfo('Got: %s trajectory: %d direction: %d', data.message, len(converted_trajectory), \
-#         len(data.direction))
-#     _TRAJECTORY = converted_trajectory
-#     _DIRECTION = data.direction
-
-global _roll, _pitch, _yaw, _x, _y, _theta
+global _roll, _pitch, _yaw, _x, _y, _theta, _trajectory, _direction
 _roll = _pitch = _yaw = _x = _y = _theta = 0.0
+_trajectory = []
+_direction = []
+
 
 def odom_callback(msg):   
     global _roll, _pitch, _yaw, _x, _y, _theta
@@ -28,19 +20,30 @@ def odom_callback(msg):
     rot_q = msg.pose.pose.orientation
     (_roll, _pitch, _theta) = euler_from_quaternion([rot_q.x, rot_q.y, rot_q.z, rot_q.w])
 
+
+def trajectory_callback(data):
+    global _trajectory, _direction
+    converted_trajectory = (np.array(data.trajectory)).reshape(-1, 3).tolist()
+    _trajectory = converted_trajectory
+    _direction = data.direction
+    rospy.loginfo('Got: %s trajectory: %d direction: %d', data.message, len(converted_trajectory), \
+        len(data.direction))
+
+
 def start_controller():
     rospy.init_node('controller', anonymous=False)
-    rate = rospy.Rate(10)  # 10hz
+    rate = rospy.Rate(100)  # 10hz
+    # cloth_sub = rospy.Subscriber('/odom', Trajectory, trajectory_callback)
+    odom_sub = rospy.Subscriber('/odom', Odometry, odom_callback)
     pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
-    sub = rospy.Subscriber('/odom', Odometry, odom_callback)
     twist_msg = Twist()
     
-    x_des = 0.4 #_TRAJECTORY[0][0]
-    y_des = 0.4 #_TRAJECTORY[0][1] 
+    x_des = 0.4 #_trajectory[0][0]
+    y_des = 0.4 #_trajectory[0][0]
     theta_des = 0.0 #* np.pi
-    Kr = 0.09
-    Ka = 0.01
-    Kb = 0.01
+    Kr = 0.07
+    Ka = 0.009
+    Kb = 0.009
     width = 0.178
 
     while not rospy.is_shutdown():
@@ -59,9 +62,11 @@ def start_controller():
         twist_msg.angular.z = omega_des #rad/s
 
 
-        # if (round(x, 1) >= x_des):
-        #     twist_msg.linear.x = 0.0
-        #     twist_msg.angular.z = 0.0
+        if (round(_x, 1) == x_des and \
+            round(_y, 1) == y_des and \
+            round(_theta, 1) == theta_des):
+            twist_msg.linear.x = 0.0
+            twist_msg.angular.z = 0.0
 
         rospy.loginfo('\nx %f y %f theta %f\nlinear x %f, y %f, z %f \nangular x %f, y %f, z %f\n'\
             , _x, _y, _theta,\

@@ -6,7 +6,6 @@ import numpy as np
 
 import sys
 sys.path.insert(0, '/home/vasilisp/catkin_ws/src/microrobot/src/scripts')
-
 from clothoids import clothoid_trajectory
 
 if __name__ == '__main__':
@@ -15,8 +14,9 @@ if __name__ == '__main__':
         rospy.init_node('trajectory_publisher', anonymous=True)
         rate = rospy.Rate(10)  # 10hz
 
-        trajectory_points = [np.array([-20., -1., 1.]), 
-                    np.array([-5., -6., 1.]),
+        trajectory_points = [
+                    np.array([-0.2, -0.1, 1.]), 
+                    np.array([-0.5, -0.6, 1.]),
                     np.array([-7., -15., 1.]),
                     np.array([25., -2., 1.]),
                     np.array([12., -1., 1.]),
