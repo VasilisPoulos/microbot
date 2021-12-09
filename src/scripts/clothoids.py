@@ -6,8 +6,6 @@ from scipy.spatial import distance
 from scipy.spatial.transform import Rotation as R, rotation
 import matplotlib.pyplot as plt
 import math
-from random import seed
-from random import random
 
 global _MAX_DEV, _LINE_INTERVAL, _WHEELS_AXIS, _CLOTHOID_INTERVAL, _BYPASS_INTERNAL_INTERVALS, \
     _STEP_MULTIPLIER, _FINAL_DISPLAY

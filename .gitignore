@@ -1,0 +1,4 @@
+.vscode/
+notes.md
+src/__pycache__/
+src/scripts/__pycache__/
