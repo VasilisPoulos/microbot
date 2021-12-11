@@ -4,10 +4,10 @@ import rospy
 import numpy as np
 import re
 from microrobot.srv  import Trajectory, TrajectoryResponse
-
-import sys
-sys.path.insert(0, '/home/vasilisp/catkin_ws/src/microrobot/src/scripts')
-from clothoids import clothoid_trajectory
+from microrobot.scripts import clothoids
+# import sys
+# sys.path.insert(0, '/home/vasilisp/catkin_ws/src/microrobot/src/scripts')
+# from clothoids import clothoid_trajectory
 
 def generate_clothoid_trajectory(trajectory_request):
     print('Sent..')
@@ -17,7 +17,7 @@ def generate_clothoid_trajectory(trajectory_request):
         trajectory_points.append(float(match.group()))
 
     converted_trajectory_points = np.array(trajectory_points).reshape(-1, 3).tolist()
-    trajectory, direction = clothoid_trajectory(converted_trajectory_points)
+    trajectory, direction = clothoids.clothoid_trajectory(converted_trajectory_points)
     converted_trajectory = np.array(trajectory).flatten().tolist()
     return TrajectoryResponse(converted_trajectory, direction)
 

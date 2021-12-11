@@ -20,15 +20,13 @@ _Ka = 0.6 # turn the robot direction to b
 _Kb = 0.3 # turn the robot to its final direction.
 _width = 0.178
 
-
 def odom_callback(msg):   
     global _roll, _pitch, _yaw, _x, _y, _theta
     _x = msg.pose.pose.position.x
     _y = msg.pose.pose.position.y
     rot_q = msg.pose.pose.orientation
     (_roll, _pitch, _theta) = euler_from_quaternion([rot_q.x, rot_q.y, rot_q.z, rot_q.w])
-
-
+    
 def clothoid_generator_client(trajectory_points):
     rospy.wait_for_service('clothoid_generator')
     try:
