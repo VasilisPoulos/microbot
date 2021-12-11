@@ -63,10 +63,13 @@ Its characteristics and specificities
 - [ ] Experiment with constant v_des.
 - [ ] Read more about PID's.
 - [ ] Make a better blender model.
-- [ ] Fix workspace. Add setup.py and __init__.py
 - [ ] Make a launch file.
 
 ## Completed
+
+### Dec 11
+
+- [x] Fix workspace. Add setup.py and __init__.py
 
 ### Dec 10
 
