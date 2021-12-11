@@ -15,10 +15,10 @@ _BYPASS_INTERNAL_INTERVALS = False # False for automatic step calculation for li
 _LINE_INTERVAL = 10 # Number of point in linear parts. 
                     # Bypassed if _BYPASS_INTERNAL_INTERVALS is True.
 _CLOTHOID_INTERVAL = 10 # Number of points in a clothoid arc.
-_WHEELS_AXIS = 1.
+_WHEELS_AXIS = 0.178
 _STEP_MULDULATION = 10. # Used to modulate the number of points in the linear parts of the trajectory, 
                        # affects performance. High number means less points.
-_FINAL_DISPLAY = 0
+_FINAL_DISPLAY = 1
 def angle_trunc(a):
     while a < 0.0:
         a += np.pi * 2
@@ -453,20 +453,16 @@ def clothoid_trajectory(points_list):
     return final_trajectory, final_direction
     
 
-#def main():
-    trajecory_points = [np.array([-20., -1., 1.]), 
+def main():
+    trajecory_points = [np.array([0., 0., 0.]), 
                         np.array([-5., -6., 1.]),
-                        np.array([-7., -15., 1.]),
-                        np.array([25., -2., 1.]),
-                        np.array([12., -1., 1.]),
-                        np.array([17., 4., 1.]),
-                        np.array([5., -1., 1.])]
+                        np.array([-7., -15., 1.])]
 
     _, _ = clothoid_trajectory(trajecory_points) # TODO: break into two functions (calculate - plot)
 
-    # c1 = Clothoid(trajecory_points[1], trajecory_points[2], trajecory_points[3])
-    # # print(c1)
-    # c1.plot()
+    c1 = Clothoid(trajecory_points[1], trajecory_points[2], trajecory_points[3])
+    # print(c1)
+    c1.plot()
     # c2 = Clothoid(trajecory_points[2], trajecory_points[3], trajecory_points[4])
     # print(c2)
     # c2.plot()
@@ -476,8 +472,10 @@ def clothoid_trajectory(points_list):
 
     # trajectory = c1.trajectory + c2.trajectory + c3.trajectory
 
-    # for point in trajectory:
-    #     plt.scatter(point[0], point[1], c='black')
-    # plt.axis('scaled')
-    # plt.show()
+    for point in c1.trajectory:
+        plt.scatter(point[0], point[1], c='black')
+    plt.axis('scaled')
+    plt.show()
 
+if __name__ == '__main__':
+    main()
