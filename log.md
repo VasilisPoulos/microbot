@@ -67,6 +67,10 @@ Its characteristics and specificities
 
 ## Completed
 
+### Dec 12
+
+Started re-building clothoids module.
+
 ### Dec 11
 
 - [x] Fix workspace. Add setup.py and __init__.py
