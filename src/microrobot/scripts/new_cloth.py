@@ -114,6 +114,19 @@ class Clothoid:
 
             path.append([self.curve_start[0] + x, self.curve_start[1] + y])
         
+        if len(path) > 2:
+            step = np.linalg.norm(self.start[:-1] - self.curve_start)/ \
+                np.linalg.norm(self.curve_start[0] - path[1][0])
+        else:
+            step = np.linalg.norm(self.start[:-1] - self.curve_start)/ \
+                np.linalg.norm(self.curve_start[0] - self.intersection[0])
+
+        line = []
+        print(step)
+        for x in np.linspace(0, np.linalg.norm(self.start[:-1] - self.curve_start), step):
+            line.append([x, 0])
+
+        path = line + path
         # Calculating the rest of the curve using symmetry.
         bisector = LinearEquation(self.intersection, self.control_point)
         symmetrical_path = []
@@ -147,8 +160,8 @@ class Clothoid:
         plt.scatter(self.start[0], self.start[1], c='green')
         plt.annotate("start", (self.start[0], self.start[1]))
 
-        plt.scatter(self.curve_start[0], self.curve_start[1], c='green')
-        plt.annotate("x0", (self.curve_start[0], self.curve_start[1]))
+        #plt.scatter(self.curve_start[0], self.curve_start[1], c='green')
+        #plt.annotate("x0", (self.curve_start[0], self.curve_start[1]))
         
         plt.scatter(self.control_point[0], self.control_point[1], c='m')
         plt.scatter(self.intersection[0], self.intersection[1], c='blue')
@@ -167,7 +180,7 @@ def test_main():
     s1 = np.array([0., 0., 1.])
     p = np.array([0.5, 0., 1.])
     s2 = np.array([0.5, 0.5, 1.])
-    c1 = Clothoid(s1, p, s2, 0.01, 0.178, 10)
+    c1 = Clothoid(s1, p, s2, 0.1, 0.178, 10)
     print(c1)
     c1.plot()
     
