@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
 import numpy as np
-from numpy.lib.financial import mirr
 import scipy.special as sc
 import matplotlib.pyplot as plt
-from clothoids_math import LinearEquation
+from clothoids_math import *
 
 class Clothoid:
     '''
