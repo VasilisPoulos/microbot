@@ -6,27 +6,6 @@ import scipy.special as sc
 import matplotlib.pyplot as plt
 from clothoids_math import LinearEquation
 
-def angle_between_lines(point_a, intersection, point_b) -> float:
-    '''Finds the angle between two lines that intersect.
-    
-    The lines begin form point a and point b respectively and intersect at the 
-    intersection point. The function converts the each line's points to vectors 
-    so that we can find the cosine of that angle using the formula of the dot 
-    product. Finally, in order to find the angle between two vectors, a and b, 
-    we will solve with respect to the angle θ.
-    '''
-    # TODO: this function converts to vectors and finds an angle, maybe it 
-    # could be splitted in two.
-    vector_a = point_a - intersection
-    vector_b = point_b - intersection
-    cos_theta = np.dot(vector_a, vector_b) / (np.linalg.norm(vector_a) * \
-        np.linalg.norm(vector_b))
-    angle_in_rad = np.arccos(cos_theta)
-    return angle_in_rad
-
-def euler_distance(point_a, point_b) -> float:
-    return np.linalg.norm(point_a - point_b)
-
 class Clothoid:
     '''
     Usually a clothoid consists of:
@@ -54,8 +33,8 @@ class Clothoid:
         self.control_point = self.__calculate_control_point()
         self.curve, self.direction = self.__calculate_clothoid()
 
-    # TODO: Remake properly, both vectors should have equal length.
     def __calculate_vector_length(self):
+    # TODO: Remake properly, both vectors should have equal length.
         vector_a = self.start - self.intersection
         vector_b = self.finish - self.intersection
 
@@ -69,8 +48,8 @@ class Clothoid:
         # more clothoid related computations here #
         return angle_between_lines(self.start, self.intersection, self.finish)
 
-    # TODO: how can i make this function more readable?
     def __calculate_characterizing_shape(self):
+    # TODO: how can i make this function more readable?
         theta_c = (np.pi - self.angle) / 2
         SF, _ = sc.fresnel(np.sqrt((2 * theta_c) / np.pi))
         characterizing_shape = (np.pi / (self.max_dev**2)) * SF**2
@@ -87,13 +66,12 @@ class Clothoid:
             + (CF / SF))
             x0 = self.start[0]
             print('[Warning self.max_dev] set to {}'.format(self.max_dev))
-            print(x0)
             self.characterizing_shape = self.__calculate_characterizing_shape()
 
         return [x0, 0]
         
-    # TODO: how can i make this function more readable?
     def __calculate_control_point(self):
+    # TODO: how can i make this function more readable?
         theta_c = (np.pi - self.angle) / 2
         SF, CF = sc.fresnel(np.sqrt((2 * theta_c) / np.pi))
         temp_x = np.sqrt(np.pi / self.characterizing_shape) * CF + self.curve_start[0]
@@ -102,6 +80,7 @@ class Clothoid:
         return control_point 
 
     def __calculate_curve_to_point_c(self):
+    # TODO: solve equation to find the right t.
         curve_path = []
         direction = np.array([])
         for t in np.linspace(0, euler_distance(self.start[0], self.control_point[0]), self.num_of_points/2):
@@ -119,6 +98,20 @@ class Clothoid:
         
         return curve_path, direction
 
+    def __calculate_line_step(self, curve_path):
+        if len(curve_path) > 2:
+            step = euler_distance(self.start[:-1], self.curve_start) / \
+                euler_distance(self.curve_start[0], curve_path[1][0])
+        else:
+            step = euler_distance(self.start[:-1], self.curve_start) / \
+                euler_distance(self.curve_start[0], self.intersection[0])
+
+        step = step * self.reduce_step
+        if step < 1:
+            step = 1
+        
+        return step
+
     def __calculate_line_segment(self, curve_path):  
         line = []
         step = self.__calculate_line_step(curve_path)
@@ -134,8 +127,6 @@ class Clothoid:
         return line, direction
 
     def __calculate_symmetric_segment(self, path, direction):
-        # Calculating the rest of the curve using symmetry.
-
         theta_c = (np.pi - self.angle)/2
         x_axis = LinearEquation([len(direction), theta_c], [len(direction)+1,  theta_c])
         mirror_x = []
@@ -145,18 +136,12 @@ class Clothoid:
 
         last_point = direction[-1]
         diff = theta_c - last_point
-        #direction = np.append(direction, theta_c)
 
         mirror_x = mirror_x + diff
-        print(mirror_x[-1])
         if mirror_x[-1] > self.angle:
-            print('jhey {}'.format(mirror_x[-1]))
             diff = mirror_x[-1] - self.angle
             mirror_x = mirror_x - diff
-        #direction = np.append(direction, mirror_x)
         mirror_x = np.append(theta_c, mirror_x)
-        print(direction)
-        print(self.angle)
         bisector = LinearEquation(self.intersection, self.control_point)
         symmetrical_path = []
         for path_point in reversed(path):
@@ -164,23 +149,9 @@ class Clothoid:
             symmetrical_path.append([symmetrical_point[0], \
                 symmetrical_point[1]])
 
+        symmetrical_path = np.vstack([self.control_point, symmetrical_path])
         return symmetrical_path, mirror_x
 
-    def __calculate_line_step(self, curve_path):
-        if len(curve_path) > 2:
-            step = euler_distance(self.start[:-1], self.curve_start) / \
-                euler_distance(self.curve_start[0], curve_path[1][0])
-        else:
-            step = euler_distance(self.start[:-1], self.curve_start) / \
-                euler_distance(self.curve_start[0], self.intersection[0])
-
-        step = step * self.reduce_step
-        if step < 1:
-            step = 1
-        
-        return step
-
-    # TODO: solve equation to find the right t.
     def __calculate_clothoid(self):
         """ Calculates a clothoid curve and the direction the robot should 
         follow in this curve. 

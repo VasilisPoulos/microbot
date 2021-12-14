@@ -13,6 +13,27 @@ def get_angle_between_points(x_orig, y_orig, x_landmark, y_landmark):
     deltaX = x_landmark - x_orig
     return angle_trunc(math.atan2(deltaY, deltaX))
 
+def angle_between_lines(point_a, intersection, point_b) -> float:
+    '''Finds the angle between two lines that intersect.
+    
+    The lines begin form point a and point b respectively and intersect at the 
+    intersection point. The function converts the each line's points to vectors 
+    so that we can find the cosine of that angle using the formula of the dot 
+    product. Finally, in order to find the angle between two vectors, a and b, 
+    we will solve with respect to the angle θ.
+    '''
+    # TODO: this function converts to vectors and finds an angle, maybe it 
+    # could be splitted in two.
+    vector_a = point_a - intersection
+    vector_b = point_b - intersection
+    cos_theta = np.dot(vector_a, vector_b) / (np.linalg.norm(vector_a) * \
+        np.linalg.norm(vector_b))
+    angle_in_rad = np.arccos(cos_theta)
+    return angle_in_rad
+
+def euler_distance(point_a, point_b) -> float:
+    return np.linalg.norm(point_a - point_b)
+
 class LinearEquation:
     def __init__(self, point_a, point_b) -> None:
         self.starting_point = point_a
@@ -37,3 +58,4 @@ class LinearEquation:
         x = temp * self.a + point_x[0]
         y = temp * self.b + point_x[1]
         return np.array([x, y]) 
+
