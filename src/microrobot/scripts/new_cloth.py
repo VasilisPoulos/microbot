@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from re import X
 from typing import Tuple as tuple
 import numpy as np
 import scipy.special as sc
@@ -12,7 +13,11 @@ class Clothoid:
 
     This class implements the theory of the Primitives for Smoothing Mobile 
     Robot Trajectories by Sara Fleury, Philippe Soukres, Jean-Paul Laumond, 
-    Raja Chatila.
+    Raja Chatila. 
+    
+    Notations: Trajectory start and intersection must be on x-axis, finish 
+    should be on the first or second quadrant. Angle must be between 0 < a < pi.
+    Every other case is deduced by symmetry.
     """
 
     def __init__(self, start, intersection, finish, max_dev=0.1, \
@@ -90,7 +95,6 @@ class Clothoid:
             curve_path.append([self.curve_start[0] + x, self.curve_start[1] + y])
             direction = np.append(direction, theta)
         curve_path = np.array(curve_path)
-        
         return curve_path, direction
 
     def __calculate_line_step_size(self, curve_path) -> float:
@@ -143,27 +147,43 @@ class Clothoid:
         y_axis_line = []
         direction_y_line = np.array([])
         step = self.__calculate_line_step_size(curve_path)
-        bisector = LinearEquation(curve_path[-1], self.finish)
+        bisector = LinearEquation(self.intersection, self.finish)
     
         # The first point of the line segment should not lay on top of the 
         # curve's last point so we offset it accordingly.
-        if len(curve_path) > 2:
-            start_of_line = [curve_path[-1][0] + \
-                euler_distance(curve_path[0][0], curve_path[1][0]), \
-                    curve_path[-1][1]]
+        if self.angle < np.pi/2: 
+            sgn = -1.
+        elif self.angle == np.pi/2:
+            sgn = 0.
         else:
-            start_of_line = [curve_path[-1] + self.max_dev, \
-                  curve_path[-1][1]]    
-                  
-        print(start_of_line[0], self.finish[0])
-        for x in np.linspace(start_of_line[0], self.finish[0], np.ceil(step)):
-            y = - (bisector.a / bisector.b) * x - (bisector.c / bisector.b)
-            y_axis_line.append([x, y])
-            direction_y_line = np.append(direction_y_line, self.angle)
+            sgn = +1.
+
+        if len(curve_path) > 2:
+            offset = sgn*euler_distance(curve_path[0][0], curve_path[1][0])
+            start_of_line = \
+                 [curve_path[-1][0] + offset, curve_path[-1][1] + offset]
+            print(curve_path[-1])
+            print(offset)
+            print(start_of_line)
+        else:
+            offset = sgn*self.max_dev
+            start_of_line = \
+                [curve_path[-1][0] + offset, curve_path[-1][1] + offset]    
+
+        if self.angle == np.pi/2:
+            for y in np.linspace(start_of_line[1], self.finish[1], np.ceil(step)):
+                y_axis_line.append([start_of_line[0], y])
+                direction_y_line = np.append(direction_y_line, self.angle)
+        else: 
+            for x in np.linspace(start_of_line[0], self.finish[0], np.ceil(step)):
+                y = - (bisector.a / bisector.b) * x - (bisector.c / bisector.b)
+                y_axis_line.append([x, y])
+                direction_y_line = np.append(direction_y_line, self.angle)
             
         return np.array(y_axis_line), direction_y_line
 
-    def __mirror_direction(self, direction):
+    def __mirror_direction(self, direction) -> list:
+        #theta_c = self.angle/2
         theta_c = (np.pi - self.angle)/2
         x_axis = LinearEquation([len(direction), theta_c], [len(direction)+1,  theta_c])
         mirror_x = []
@@ -175,11 +195,18 @@ class Clothoid:
         diff = theta_c - last_point
 
         mirror_x = mirror_x + diff
+        # TODO: this is a patch, is theta_c really (pi - a)/2 ?
         if mirror_x[-1] > self.angle:
+
             diff = mirror_x[-1] - self.angle
-            mirror_x = mirror_x - diff
-        complete_direction = np.append(theta_c, mirror_x)
-        return complete_direction
+            for idx, item in enumerate(mirror_x):
+                temp = item - diff
+                if temp >= theta_c: 
+                    mirror_x[idx] = item - diff
+                else:
+                    mirror_x[idx] = (self.angle + theta_c) / 2
+        mirrored_direction = np.append(theta_c, mirror_x)
+        return mirrored_direction
 
     def __calculate_symmetric_curve_segment(self, path) -> tuple[list, list]:  
         bisector = LinearEquation(self.intersection, self.control_point)
@@ -212,10 +239,10 @@ class Clothoid:
         direction_wo_y_line = np.append(x_line_direction, curve_direction)
         complete_direction = np.append(direction_wo_y_line, y_line_direction)
 
-        print('path \n{}'.format(complete_path))
-        print('direction \n{}'.format(complete_direction))
-        print('path {}'.format(len(complete_path)))
-        print('direction {}'.format(len(complete_direction)))
+        # print('path \n{}'.format(complete_path))
+        # # print('direction \n{}'.format(complete_direction))
+        # print('path {}'.format(len(complete_path)))
+        # print('direction {}'.format(len(complete_direction)))
         return complete_path, complete_direction
 
     def __str__(self) -> str:
@@ -252,12 +279,11 @@ class Clothoid:
 
 def test_main():
     s1 = np.array([0., 0., 1.])
-    p = np.array([1.2, 0., 1.])
-    s2 = np.array([2.5, 8., 1.])
+    p = np.array([0.5, 0., 1.])
+    s2 = np.array([0.5, 0.5, 1.])
     # TODO: catch 180 deg case in a function that handles the user input.
-    c1 = Clothoid(s1, p, s2, max_dev=0.1, num_of_points=25)
+    c1 = Clothoid(s1, p, s2, max_dev=0.01, num_of_points=10)
     c1.plot()
-
-    
+    #print(c1.angle)
 if __name__ == '__main__':
     test_main()
