@@ -1,21 +1,16 @@
 #!/usr/bin/env python
 
+from typing import Tuple as tuple
 import numpy as np
 import scipy.special as sc
 import matplotlib.pyplot as plt
 from clothoids_math import *
 
 class Clothoid:
-    '''
-    Usually a clothoid consists of:
-        - <S1> -> start
-        - <S2> -> finish
-        - <P> -> intersection 
-        - <e> -> vector_length
-        - <a> -> angle
-        - <list> of (x, y) points that follow the cloth.
-
-    '''
+    """ Calculates a path and direction for a trajectory that contains a 
+    clothoid curve.
+    """
+    
     def __init__(self, start, intersection, finish, max_dev=0.1, \
         wheel_axis=0.1, num_of_points=10, reduce_step=0.40) -> None:
         self.start = start
@@ -32,7 +27,7 @@ class Clothoid:
         self.control_point = self.__calculate_control_point()
         self.curve, self.direction = self.__calculate_clothoid()
 
-    def __calculate_vector_length(self):
+    def __calculate_vector_length(self) -> float:
     # TODO: Remake properly, both vectors should have equal length.
         vector_a = self.start - self.intersection
         vector_b = self.finish - self.intersection
@@ -43,18 +38,18 @@ class Clothoid:
             print('Unequal vectors')     
         return vector_a_length
 
-    def __calculate_angle(self):     
+    def __calculate_angle(self) -> float:     
         # more clothoid related computations here #
         return angle_between_lines(self.start, self.intersection, self.finish)
 
-    def __calculate_characterizing_shape(self):
+    def __calculate_characterizing_shape(self) -> float:
     # TODO: how can i make this function more readable?
         theta_c = (np.pi - self.angle) / 2
         SF, _ = sc.fresnel(np.sqrt((2 * theta_c) / np.pi))
         characterizing_shape = (np.pi / (self.max_dev**2)) * SF**2
         return characterizing_shape
 
-    def __calculate_clothoid_starting_point(self):
+    def __calculate_clothoid_starting_point(self) -> list:
         
         SF, CF = sc.fresnel(np.sqrt((np.pi - self.angle) / np.pi))
         x0 = self.vector_length - self.max_dev * ((1 / np.tan(self.angle / 2)) + (CF / SF))    
@@ -69,16 +64,14 @@ class Clothoid:
 
         return [x0, 0]
         
-    def __calculate_control_point(self):
-    # TODO: how can i make this function more readable?
+    def __calculate_control_point(self) -> list:
         theta_c = (np.pi - self.angle) / 2
         SF, CF = sc.fresnel(np.sqrt((2 * theta_c) / np.pi))
-        temp_x = np.sqrt(np.pi / self.characterizing_shape) * CF + self.curve_start[0]
-        temp_y = np.sqrt(np.pi / self.characterizing_shape) * SF
-        control_point = np.array([temp_x , temp_y])
-        return control_point 
+        x_c = np.sqrt(np.pi / self.characterizing_shape) * CF + self.curve_start[0]
+        y_c = np.sqrt(np.pi / self.characterizing_shape) * SF
+        return np.array([x_c , y_c]) 
 
-    def __calculate_curve_to_point_c(self):
+    def __calculate_curve_to_point_c(self) -> tuple[list, list]:
     # TODO: solve equation to find the right t.
         curve_path = []
         direction = np.array([])
@@ -97,7 +90,11 @@ class Clothoid:
         
         return curve_path, direction
 
-    def __calculate_line_step(self, curve_path):
+    def __calculate_line_step_size(self, curve_path) -> float:
+        """ Calculates the step size for the line segment before the clothoid 
+        curve.
+
+        """
         if len(curve_path) > 2:
             step = euler_distance(self.start[:-1], self.curve_start) / \
                 euler_distance(self.curve_start[0], curve_path[1][0])
@@ -111,12 +108,25 @@ class Clothoid:
         
         return step
 
-    def __calculate_line_segment(self, curve_path):  
+    def __calculate_line_segment(self, curve_path) -> tuple[list, list]:  
+        """ Calculates the line points before the clothoid curve.
+        """
+
         line = []
-        step = self.__calculate_line_step(curve_path)
-        direction_on_line = np.array([])
         direction = []
-        end_of_line = [self.curve_start[0] - euler_distance(self.start[:-1], self.curve_start), self.curve_start[1]]
+        direction_on_line = np.array([])
+        step = self.__calculate_line_step_size(curve_path)
+
+        # The last point of the line segment should not lay on top of the 
+        # curve's first point so we offset it accordingly.
+        if len(curve_path) > 1:
+            end_of_line = [self.curve_start[0] - \
+                euler_distance(curve_path[0][0], curve_path[1][0]), \
+                    self.curve_start[1]]
+        else:
+            end_of_line = [self.curve_start[0] - self.max_dev, \
+                self.curve_start[1]]
+
         for x in np.linspace(0, euler_distance(self.start[:-1], end_of_line), step):
             line.append([x, 0])
             direction_on_line = np.append(direction_on_line, 0)
@@ -125,7 +135,7 @@ class Clothoid:
         line = np.array(line) 
         return line, direction
 
-    def __calculate_symmetric_segment(self, path, direction):
+    def __calculate_symmetric_segment(self, path, direction) -> tuple[list, list]:
         theta_c = (np.pi - self.angle)/2
         x_axis = LinearEquation([len(direction), theta_c], [len(direction)+1,  theta_c])
         mirror_x = []
@@ -151,9 +161,9 @@ class Clothoid:
         symmetrical_path = np.vstack([self.control_point, symmetrical_path])
         return symmetrical_path, mirror_x
 
-    def __calculate_clothoid(self):
-        """ Calculates a clothoid curve and the direction the robot should 
-        follow in this curve. 
+    def __calculate_clothoid(self) -> tuple[list, list]:
+        """ Calculates the path and the direction of a trajectory that includes 
+        a clothoid curve. 
         """
         curve_path, curve_direction = self.__calculate_curve_to_point_c()
         line, line_direction = self.__calculate_line_segment(curve_path)
@@ -172,7 +182,7 @@ class Clothoid:
             '\nMaxdev: {}\n#points: {}\n'.format(self.max_dev, \
             self.num_of_points) 
 
-    def plot(self):
+    def plot(self) -> None:
         plt.style.use('seaborn-whitegrid')
         plt.subplot(1, 2, 1)
         plt.title('Clothoid Curve ')
@@ -181,13 +191,8 @@ class Clothoid:
         for item in self.curve:
             plt.scatter(item[0], item[1], c='black')
         
-        x_c = self.vector_length - self.max_dev*(1 / np.tan(self.angle/2))
-        y_c = self.max_dev
-        plt.scatter(y_c, x_c, c='pink')
-        #plt.scatter(self.start[0], self.start[1], c='green')
         plt.annotate("start", (self.start[0], self.start[1]))
 
-        #plt.scatter(self.curve_start[0], self.curve_start[1], c='green')
         plt.annotate("x0", (self.curve_start[0], self.curve_start[1]))
         
         plt.scatter(self.control_point[0], self.control_point[1], c='m')
@@ -204,11 +209,14 @@ class Clothoid:
 
 def test_main():
     s1 = np.array([0., 0., 1.])
-    p = np.array([0.5, 0., 1.])
-    s2 = np.array([0.5, 0.5, 1.])
-    c1 = Clothoid(s1, p, s2, max_dev=0.05, num_of_points=15)
-    print(c1)
+    p = np.array([1.2, 0., 1.])
+    s2 = np.array([1.3, 1., 1.])
+    # TODO: catch 180 deg case in a function that handles the user input.
+    c1 = Clothoid(s1, p, s2, max_dev=0.01, num_of_points=20)
+    print(c1.curve)
+    print(c1.direction)
     c1.plot()
+
     
 if __name__ == '__main__':
     test_main()
