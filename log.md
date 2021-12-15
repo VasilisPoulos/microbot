@@ -67,6 +67,10 @@ Its characteristics and specificities
 
 ## Completed
 
+### Dec 1
+
+Kept refacotoring clothoid module, thought about test cases.
+
 ### Dec 12
 
 Started re-building clothoids module.
