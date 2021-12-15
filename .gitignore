@@ -1,4 +1,6 @@
 .vscode/
 notes.md
-src/__pycache__/
-src/scripts/__pycache__/
+src/microrobot/__pycache__/
+src/microrobot/scripts/__pycache__/
+__pycache__
+src/microrobot/tests/__pycache__
