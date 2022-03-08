@@ -1,60 +1,25 @@
-from matplotlib import markers
+#!/usr/bin/env python
+
+import math
 import numpy as np
-from numpy.lib.function_base import append
 import scipy.special as sc
 from scipy.spatial import distance
-from scipy.spatial.transform import Rotation as R, rotation
+from scipy.spatial.transform import Rotation as R
+from clothoids_math import *
 import matplotlib.pyplot as plt
-import math
 
 global _MAX_DEV, _LINE_INTERVAL, _WHEELS_AXIS, _CLOTHOID_INTERVAL, _BYPASS_INTERNAL_INTERVALS, \
     _STEP_MULTIPLIER, _FINAL_DISPLAY
 
 _MAX_DEV = 0.1 # Max trajectory deviation from control point.
 _BYPASS_INTERNAL_INTERVALS = False # False for automatic step calculation for linear parts.
-_LINE_INTERVAL = 10 # Number of point in linear parts. 
+_LINE_INTERVAL = 3 # Number of point in linear parts. 
                     # Bypassed if _BYPASS_INTERNAL_INTERVALS is True.
-_CLOTHOID_INTERVAL = 10 # Number of points in a clothoid arc.
+_CLOTHOID_INTERVAL = 14 # Number of points in a clothoid arc.
 _WHEELS_AXIS = 0.178
-_STEP_MULDULATION = 10. # Used to modulate the number of points in the linear parts of the trajectory, 
+_STEP_MULDULATION = 100. # Used to modulate the number of points in the linear parts of the trajectory, 
                        # affects performance. High number means less points.
 _FINAL_DISPLAY = 1
-def angle_trunc(a):
-    while a < 0.0:
-        a += np.pi * 2
-    return a
-
-
-def get_angle_between_points(x_orig, y_orig, x_landmark, y_landmark):
-    deltaY = y_landmark - y_orig
-    deltaX = x_landmark - x_orig
-    return angle_trunc(math.atan2(deltaY, deltaX))
-
-
-class LinearEquation:
-    def __init__(self, point_a, point_b) -> None:
-        self.starting_point = point_a
-        self.finishing_point = point_b
-        self.a, self.b, self.c \
-            = self.calculate_linear_equation_coefficients()
-
-    def calculate_linear_equation_coefficients(self):
-        """Returns a, b, c coefficients a linear equation for two points."""
-        a = self.starting_point[1] - self.finishing_point[1]
-        b = self.finishing_point[0] - self.starting_point[0]
-        c = self.starting_point[0] * self.finishing_point[1] \
-            - self.starting_point[1] * self.finishing_point[0]
-        return a, b, c
-
-    def find_symmetrical_point_of(self, point_x):
-        """Returns the symmetric coordinates of a point with respect to a line that 
-        passes through the control point [C] and the intesection point of S1 and S2 
-        [P]."""
-        temp = -2 * (self.a * point_x[0] + self.b * point_x[1] + self.c) \
-                / (self.a * self.a + self.b * self.b)
-        x = temp * self.a + point_x[0]
-        y = temp * self.b + point_x[1]
-        return np.array([x, y]) 
 
 
 class Clothoid:
@@ -112,7 +77,6 @@ class Clothoid:
             self.trajectory = self.clothoid_trajectory
             self.direction = self.clothoid_direction 
 
-
     def move_trajectory_to_x_axis(self):
         """ Moves the start, intersection and finsih points of a trajectory to the 
         
@@ -124,7 +88,6 @@ class Clothoid:
         self.intersection_point = self.intersection_point + offset
 
         return offset
-
 
     def rotate_trajectory(self):
         self.start_vector = self.trajectory_start - self.intersection_point 
@@ -139,7 +102,6 @@ class Clothoid:
         self.intersection_point = rot.apply(self.intersection_point)
         return rotation_angle
 
-
     def retransform_trajectory(self):
         rot = R.from_euler('z', self.rotation_offset, degrees=True)
         transformed_trajectory = []
@@ -153,7 +115,6 @@ class Clothoid:
             transformed_trajectory.append(trajectory_point)
         
         return transformed_trajectory
-
 
     def transform_direction(self):
         x0 = self.trajectory[0][0]
@@ -171,7 +132,6 @@ class Clothoid:
 
         return [rotation_angle + angle for angle in temp_direction]
  
-
     def calculate_turn_angle(self):
         cosine_of_angle = np.dot(self.start_vector, self.finish_vector) \
             / (np.linalg.norm(self.start_vector) * np.linalg.norm(self.finish_vector))
@@ -194,13 +154,11 @@ class Clothoid:
 
         return turn_angle
 
-
     def calculate_characterizing_shape(self):
         theta_c = (np.pi - self.turn_angle) / 2
         SF, _ = sc.fresnel(np.sqrt((2 * theta_c) / np.pi))
         characterizing_shape = (np.pi / (_MAX_DEV**2)) * SF**2
         return characterizing_shape
-
 
     def calculate_control_point(self):
         theta_c = (np.pi - self.turn_angle) / 2
@@ -211,7 +169,6 @@ class Clothoid:
         control_point = np.array([temp_x, temp_y])
         return control_point 
 
-
     def calculate_vector_length(self):
         start_vector_length = np.sqrt(self.start_vector[0]**2 \
             + self.start_vector[1]**2)
@@ -219,7 +176,6 @@ class Clothoid:
             + self.finish_vector[1]**2)  
         # TODO: Remake properly  
         return start_vector_length
-
 
     def calculate_clothoid_starting_point(self):
         global _MAX_DEV
@@ -236,7 +192,6 @@ class Clothoid:
             else:
                 break
         return x0 
-
 
     def calculate_clothoid_curve(self):
         """ Calculates a clotoid curve and the direction the robot should follow in this curve. """
@@ -280,7 +235,6 @@ class Clothoid:
 
         return path + symmetrical_path, direction + symmetrical_directions
 
-
     def calculate_straight_lines(self):
         
         if len(self.clothoid_curve) >= 2 and not _BYPASS_INTERNAL_INTERVALS:
@@ -309,7 +263,6 @@ class Clothoid:
 
         return s1_line, s2_line
 
-
     def calculate_clothoid_trajectory(self):
         s1_line, s2_line = self.calculate_straight_lines()
 
@@ -337,7 +290,6 @@ class Clothoid:
 
         return trajectory
 
-
     def __str__(self) -> str:
         return 'Clothoid {}\n' \
             'Trajectory start: {}\n' \
@@ -350,7 +302,6 @@ class Clothoid:
             .format(id(self), self.trajectory_start, self.trajectory_finish, 
                 self.clothoid_start, self.clothoid_finish, self.control_point, 
                 self.intersection_point, np.degrees(self.turn_angle))
-
 
     def plot(self):
         plt.style.use('seaborn-whitegrid')
@@ -414,7 +365,6 @@ class Clothoid:
         
         plt.show()
 
-
 def clothoid_trajectory(points_list):
     clothoid_list = []
     for index in range(len(points_list)//3 + 1):
@@ -452,30 +402,35 @@ def clothoid_trajectory(points_list):
 
     return final_trajectory, final_direction
     
-
 def main():
-    trajecory_points = [np.array([0., 0., 0.]), 
-                        np.array([-5., -6., 1.]),
-                        np.array([-7., -15., 1.])]
+    # trajecory_points = [np.array([0., 0., 0.]), 
+    #                     np.array([-5., -6., 1.]),
+    #                     np.array([-7., -15., 1.])]
 
-    _, _ = clothoid_trajectory(trajecory_points) # TODO: break into two functions (calculate - plot)
+    # _, _ = clothoid_trajectory(trajecory_points) # TODO: break into two functions (calculate - plot)
 
-    c1 = Clothoid(trajecory_points[1], trajecory_points[2], trajecory_points[3])
-    # print(c1)
+    # c1 = Clothoid(trajecory_points[1], trajecory_points[2], trajecory_points[3])
+    # # print(c1)
+    # c1.plot()
+    # # c2 = Clothoid(trajecory_points[2], trajecory_points[3], trajecory_points[4])
+    # # print(c2)
+    # # c2.plot()
+    # # c3 = Clothoid(trajecory_points[4], trajecory_points[5], trajecory_points[6])
+    # # print(c3)
+    # # c3.plot()
+
+    # # trajectory = c1.trajectory + c2.trajectory + c3.trajectory
+
+    # for point in c1.trajectory:
+    #     plt.scatter(point[0], point[1], c='black')
+    # plt.axis('scaled')
+    # plt.show()
+    s1 = np.array([0., 0., 1.])
+    p = np.array([0.5, 0., 1.])
+    s2 = np.array([0.5, 0.5, 1.])
+    c1 = Clothoid(s1, p, s2)
+    print(np.degrees(c1.turn_angle))
     c1.plot()
-    # c2 = Clothoid(trajecory_points[2], trajecory_points[3], trajecory_points[4])
-    # print(c2)
-    # c2.plot()
-    # c3 = Clothoid(trajecory_points[4], trajecory_points[5], trajecory_points[6])
-    # print(c3)
-    # c3.plot()
-
-    # trajectory = c1.trajectory + c2.trajectory + c3.trajectory
-
-    for point in c1.trajectory:
-        plt.scatter(point[0], point[1], c='black')
-    plt.axis('scaled')
-    plt.show()
 
 if __name__ == '__main__':
     main()

@@ -21,7 +21,7 @@ class Clothoid:
     """
 
     def __init__(self, start, intersection, finish, max_dev=0.1, \
-        wheel_axis=0.1, num_of_points=10, reduce_step=0.40) -> None:
+        wheel_axis=0.1, num_of_points=10, reduce_step=0.0) -> None:
         self.start = start
         self.intersection = intersection
         self.finish = finish
@@ -38,12 +38,12 @@ class Clothoid:
 
     def __calculate_vector_length(self) -> float:
         vector_a = self.start - self.intersection
-        vector_b = self.finish - self.intersection
+        # vector_b = self.finish - self.intersection
 
         vector_a_length = np.linalg.norm(vector_a)
-        vector_b_length = np.linalg.norm(vector_b)
-        if vector_a_length != vector_b_length:
-            print('Unequal vectors')     
+        # vector_b_length = np.linalg.norm(vector_b)
+        # if vector_a_length != vector_b_length:
+        #   print('Unequal vectors')     
         
         return vector_a_length
 
@@ -111,7 +111,7 @@ class Clothoid:
 
         step = step * self.reduce_step
         if step < 1:
-            step = 1
+            step = 2
         
         return step
 
@@ -161,25 +161,21 @@ class Clothoid:
         if len(curve_path) > 2:
             offset = sgn*euler_distance(curve_path[0][0], curve_path[1][0])
             start_of_line = \
-                 [curve_path[-1][0] + offset, curve_path[-1][1] + offset]
-            print(curve_path[-1])
-            print(offset)
-            print(start_of_line)
+                [curve_path[-1][0] + offset, curve_path[-1][1] + offset]
         else:
             offset = sgn*self.max_dev
             start_of_line = \
                 [curve_path[-1][0] + offset, curve_path[-1][1] + offset]    
 
         if self.angle == np.pi/2:
-            for y in np.linspace(start_of_line[1], self.finish[1], np.ceil(step)):
-                y_axis_line.append([start_of_line[0], y])
+            for y in np.linspace(start_of_line[1], self.finish[1], np.floor(step)):
+                y_axis_line.append([-(bisector.c / bisector.a), y])
                 direction_y_line = np.append(direction_y_line, self.angle)
         else: 
-            for x in np.linspace(start_of_line[0], self.finish[0], np.ceil(step)):
+            for x in np.linspace(start_of_line[0], self.finish[0], np.floor(step)):
                 y = - (bisector.a / bisector.b) * x - (bisector.c / bisector.b)
                 y_axis_line.append([x, y])
                 direction_y_line = np.append(direction_y_line, self.angle)
-            
         return np.array(y_axis_line), direction_y_line
 
     def __mirror_direction(self, direction) -> list:
@@ -219,6 +215,10 @@ class Clothoid:
         symmetrical_path = np.vstack([self.control_point, symmetrical_path])
         return symmetrical_path
 
+    def __curve_exceeded_finish(self, curve):
+        return True if curve[-1][0] > self.finish[0] or \
+            curve[-1][1] > self.finish[1] else False
+
     def __calculate_clothoid(self) -> tuple[list, list]:
         """ Calculates the path and the direction of a trajectory that includes 
         a clothoid curve. 
@@ -227,6 +227,10 @@ class Clothoid:
         x_line, x_line_direction = self.__calculate_x_axis_line_segment(left_curve_path)  
         right_curve_half = self.__calculate_symmetric_curve_segment(left_curve_path)
         curve_path = np.vstack([left_curve_path, right_curve_half])
+        if self.__curve_exceeded_finish(curve_path): 
+            print('Invalid input, clothoid exceeded trajectory finish.'\
+                + ' Try reducing max_dev.')
+            exit(-1)
         
         right_direction_half =  self.__mirror_direction(left_curve_direction)
         curve_direction = np.concatenate([left_curve_direction, right_direction_half])
@@ -279,10 +283,11 @@ class Clothoid:
 
 def test_main():
     s1 = np.array([0., 0., 1.])
-    p = np.array([0.5, 0., 1.])
-    s2 = np.array([0.5, 0.5, 1.])
+    p = np.array([0.2, 0., 1.])
+    s2 = np.array([0.2, 0.6, 1.])
     # TODO: catch 180 deg case in a function that handles the user input.
-    c1 = Clothoid(s1, p, s2, max_dev=0.01, num_of_points=10)
+    c1 = Clothoid(s1, p, s2, max_dev=0.1, num_of_points=10)
+    print(c1.path)
     c1.plot()
     #print(c1.angle)
 if __name__ == '__main__':

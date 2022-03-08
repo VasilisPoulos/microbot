@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="microrobot">
+  <xacro:property name="platform_diameter" value="0.0365"/>
+  <xacro:property name="platform_thickness" value="0.001"/>
+  <xacro:property name="triangle_side" value="0.0292"/>
+  <xacro:property name="support_diameter" value="0.002"/>
+  <xacro:property name="motor_length" value="0.008"/>
+  <xacro:property name="eccentric_load_length" value="0.0044"/>
+  <xacro:property name="distance_between_motors" value="0.0117"/>  
+
+  <material name="white">
+    <color rgba="1 1 1 1"/>
+  </material>
+
+  <link name="platform_link">
+    <visual>
+      <geometry>
+        <cylinder length="${platform_thickness}" radius="${platform_diameter/2}"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+  </link>
+
+  <link name="support_A">
+    <visual>
+      <geometry>
+        <sphere radius="0.002"/>
+      </geometry>
+      <material name="white"/>
+      <origin xyz=" ${triangle_side/2 - support_diameter/2} 
+                    ${-sin(radians(30)) * (platform_diameter/2 - support_diameter/2)}
+                    0"/>
+    </visual>
+  </link>
+
+  <joint name="platform_to_support_A" type="fixed">
+    <parent link="platform_link"/>
+    <child link="support_A"/>
+  </joint>
+
+  <link name="support_B">
+    <visual>
+      <geometry>
+        <sphere radius="0.002"/>
+      </geometry>
+      <material name="white"/>
+      <origin xyz="0 ${platform_diameter/2 - support_diameter} 0"/>
+    </visual>
+  </link>
+
+  <joint name="platform_to_support_B" type="fixed">
+    <parent link="platform_link"/>
+    <child link="support_B"/>
+  </joint>
+
+  <link name="support_C">
+    <visual>
+      <geometry>
+        <sphere radius="0.002"/>
+      </geometry>
+      <material name="white"/>
+      <origin xyz=" ${-triangle_side/2 + support_diameter/2} 
+                    ${-sin(radians(30)) * (platform_diameter/2 - support_diameter/2)}
+                    0"/>
+    </visual>
+  </link>
+
+  <joint name="platform_to_support_C" type="fixed">
+    <parent link="platform_link"/>
+    <child link="support_C"/>
+  </joint>
+
+  <link name="left_motor">
+    <visual>
+      <geometry>
+        <box size="${motor_length} ${motor_length/2} ${motor_length/2}"/>
+      </geometry>
+      <material name="white"/>
+      <origin xyz=" ${-(distance_between_motors/2 + motor_length/2 + eccentric_load_length)} 
+                    0 
+                    ${motor_length/4 + platform_thickness/2}"/>
+    </visual>
+  </link>
+
+  <joint name="platform_to_left_motor" type="fixed">
+    <parent link="platform_link"/>
+    <child link="left_motor"/>
+  </joint>
+
+  <link name="right_motor">
+    <visual>
+      <geometry>
+        <box size="${motor_length} ${motor_length/2} ${motor_length/2}"/>
+      </geometry>
+      <material name="white"/>
+      <origin xyz=" ${distance_between_motors/2 + motor_length/2 + eccentric_load_length} 
+                    0 
+                    ${motor_length/4 + platform_thickness/2}"/>
+    </visual>
+  </link>
+
+  <joint name="platform_to_right_motor" type="fixed">
+    <parent link="platform_link"/>
+    <child link="right_motor"/>
+  </joint>
+
+   <link name="right_eccenter">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0.02 0"/>
+      <geometry>
+        <mesh filename="package://microrobot/meshes/half_cylinder.dae"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="right_motor_to_eccenter" type="fixed">
+    <parent link="platform_link"/>
+    <child link="right_eccenter"/>
+  </joint>
+</robot>

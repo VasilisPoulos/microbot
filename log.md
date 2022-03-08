@@ -4,6 +4,20 @@
 
 - Why would i need /tf_static for always true data if thats not the case in the real world?
 
+- Theta_c not true sometimes
+
+- cases where user input is impossible to execute.
+  - (Case 1) CLothoid exceeds trajectory finish.
+    Trigger by:
+
+    ```python
+    s1 = np.array([0., 0., 1.])
+    p = np.array([0.5, 0., 1.])
+    s2 = np.array([0.5, 0.2, 1.])
+
+    c1 = Clothoid(s1, p, s2, max_dev=0.1, num_of_points=10)
+    ```
+
 ## Notes
 
 Turtlebot setup link <https://automaticaddison.com/how-to-launch-the-turtlebot3-simulation-with-ros/>
@@ -67,7 +81,15 @@ Its characteristics and specificities
 
 ## Completed
 
-### Dec 1
+### March 8 2022
+
+![image](../microrobot/images/urdf_progress.png)
+
+![image](../microrobot/images/geometry.png)
+
+![image](../microrobot/images/functions.png)
+
+### Dec 14
 
 Kept refacotoring clothoid module, thought about test cases.
 
