@@ -83,6 +83,11 @@ Its characteristics and specificities
 
 ### March 8 2022
 
+inertia work, eccentrers
+![image](../microrobot/images/inertia.png)
+
+### March 8 2022
+
 ![image](../microrobot/images/urdf_progress.png)
 
 ![image](../microrobot/images/geometry.png)
