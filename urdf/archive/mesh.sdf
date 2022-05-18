@@ -1,0 +1,141 @@
+<sdf version='1.7'>
+  <model name='microrobot'>
+    <link name='dummy_link'>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>0.12002</mass>
+        <inertia>
+          <ixx>2.75891e-05</ixx>
+          <ixy>0</ixy>
+          <ixz>1.775e-16</ixz>
+          <iyy>2.6597e-05</iyy>
+          <iyz>0</iyz>
+          <izz>5.41536e-05</izz>
+        </inertia>
+      </inertial>
+      <collision name='dummy_link_fixed_joint_lump__platform_link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://microrobot/meshes/colision_mesh/platform_collision_mesh_v3.stl</uri>
+          </mesh>
+        </geometry>
+        <surface>
+        <friction>
+          <ode>
+            <mu>0.04</mu>
+          </ode>
+        </friction>
+      </surface>
+      </collision>
+      <visual name='dummy_link_fixed_joint_lump__platform_link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://microrobot/meshes/colision_mesh/platform_collision_mesh_v3.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='left_eccenter_joint' type='revolute'>
+      <pose relative_to='dummy_link'>0 0.03 0.003 0 -0 0</pose>
+      <parent>dummy_link</parent>
+      <child>left_eccenter_link</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-1e+16</lower>
+          <upper>1e+16</upper>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='left_eccenter_link'>
+      <pose relative_to='left_eccenter_joint'>0 0 0 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>0.000217</mass>
+        <inertia>
+          <ixx>2.23e-10</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.78e-10</iyy>
+          <iyz>0</iyz>
+          <izz>3.8e-10</izz>
+        </inertia>
+      </inertial>
+      <collision name='left_eccenter_link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://microrobot/meshes/colision_mesh/eccenter_collision_mesh_v2.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='left_eccenter_link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://microrobot/meshes/colision_mesh/eccenter_collision_mesh_v2.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='right_eccenter_joint' type='revolute'>
+      <pose relative_to='dummy_link'>0 -0.03 0.003 0 -0 3.14159</pose>
+      <parent>dummy_link</parent>
+      <child>right_eccenter_link</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-1e+16</lower>
+          <upper>1e+16</upper>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='right_eccenter_link'>
+      <pose relative_to='right_eccenter_joint'>0 0 0 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>0.00021</mass>
+        <inertia>
+          <ixx>2.39e-10</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.71e-10</iyy>
+          <iyz>-2e-12</iyz>
+          <izz>3.44e-10</izz>
+        </inertia>
+      </inertial>
+      <collision name='right_eccenter_link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://microrobot/meshes/colision_mesh/eccenter_collision_mesh_v2.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='right_eccenter_link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.001 0.001 0.001</scale>
+            <uri>model://microrobot/meshes/colision_mesh/eccenter_collision_mesh_v2.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+  </model>
+</sdf>

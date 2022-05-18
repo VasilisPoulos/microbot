@@ -12,7 +12,27 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   message_generation
+  xacro REQUIRED
 )
+
+###############################################################################
+# Xacro files
+file(GLOB xacro_files ${CMAKE_CURRENT_SOURCE_DIR}/worlds/*.world.xacro)
+
+foreach(it ${xacro_files})
+  # remove .xacro extension
+  string(REGEX MATCH "(.*)[.]xacro$" unused ${it})
+  set(output_filename ${CMAKE_MATCH_1})
+
+  # create a rule to generate ${output_filename} from {it}
+  xacro_add_xacro_file(${it} ${output_filename})
+
+  list(APPEND world_files ${output_filename})
+endforeach(it)
+
+# add an abstract target to actually trigger the builds
+add_custom_target(media_files ALL DEPENDS ${world_files})
+###############################################################################
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)

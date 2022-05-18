@@ -1,0 +1,94 @@
+General
+	Part Number	Collision Mesh
+	Part Name	Collision Mesh v3
+	Description
+	Material Name	(Various)
+
+Manage
+	Item Number
+	Lifecycle
+	Revision
+	State	Working
+	Change Order
+
+Physical
+	Mass	120.02 g	-->	0.12002	(Kg)
+	Volume	1527.224 mm^3
+	Density	0.079 g / mm^3
+	Area	6168.253 mm^2
+	World X,Y,Z	0.00 mm, 0.00 mm, 0.00 mm
+	Center of Mass	6.162E-09 mm, 0.00 mm, 0.64 mm
+	Bounding Box
+		Length	60.00 mm
+		Width	60.00 mm
+		Height	5.20 mm
+	Moment of Inertia at Center of Mass   (g mm^2)
+		Ixx	27589.146	-->	0.000027589146 		(Kg m^2)
+		Ixy	0.00
+		Ixz	1.775E-07	-->	0.0000000000000001775	(Kg m^2)
+		Iyx	0.00
+		Iyy	26596.997	-->	0.000026596997 		(Kg m^2)
+		Iyz	0.00
+		Izx	1.775E-07	-->	0.0000000000000001775	(Kg m^2)
+		Izy	0.00
+		Izz	54153.556	-->	0.000054153556		(Kg m^2)
+	Moment of Inertia at Origin   (g mm^2)
+		Ixx	27638.309
+		Ixy	0.00
+		Ixz	-2.958E-07
+		Iyx	0.00
+		Iyy	26646.161
+		Iyz	0.00
+		Izx	-2.958E-07
+		Izy	0.00
+		Izz	54153.556
+
+========================
+======= Eccenter =======
+========================
+
+General
+	Part Number	Eccenter Collision Mesh
+	Part Name	Eccenter Collision Mesh v1
+	Description
+	Material Name	Steel (1)
+
+Manage
+	Item Number
+	Lifecycle
+	Revision
+	State	Working
+	Change Order
+
+Physical
+	Mass	0.217 g	--> 0.000217 (Kg)
+	Volume	18.85 mm^3
+	Density	0.012 g / mm^3
+	Area	43.416 mm^2
+	World X,Y,Z	0.00 mm, 0.00 mm, 0.00 mm
+	Center of Mass	0.00 mm, 1.50 mm, -0.849 mm
+	Bounding Box
+		Length	4.00 mm
+		Width	3.00 mm
+		Height	2.00 mm
+	Moment of Inertia at Center of Mass   (g mm^2)
+		Ixx	0.223	--> 0.000000000223 (Kg/m^2)	
+		Ixy	0.00
+		Ixz	0.00
+		Iyx	0.00
+		Iyy	0.278	--> 0.000000000278 (Kg/m^2)
+		Iyz	0.00
+		Izx	0.00
+		Izy	0.00
+		Izz	0.38	--> 0.00000000038 (Kg/m^2)
+	Moment of Inertia at Origin   (g mm^2)
+		Ixx	0.868
+		Ixy	0.00
+		Ixz	0.00
+		Iyx	0.00
+		Iyy	0.434
+		Iyz	0.276
+		Izx	0.00
+		Izy	0.276
+		Izz	0.868
+

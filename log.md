@@ -81,7 +81,42 @@ Its characteristics and specificities
 
 ## Completed
 
-### March 8 2022
+### March 14 2022
+
+Began remaking urdf
+
+![image](../microrobot/images/simple_platform_with_eccentric.png)
+
+![image](../microrobot/images/base_geometry.png)
+
+![image](../microrobot/images/mass_table.png)
+
+from [ETCAE15.pdf](http://nereus.mech.ntua.gr/Documents/pdf_ps/ETCAE15.pdf).
+
+Robot's [site](https://csl-ep.mech.ntua.gr/research-areas/microrobotics/)
+
+![image](../microrobot/images/motor_and_needle.png)
+### March 13 2022
+
+Probably i have to use ROS2, i read many things about ros and started to understand how my ros projects should be. I tested my urdf, definitely need a remake. Read most of the useful info from the robot's papers (anything design - related).
+
+### March 12 2022
+
+microrobot in gazebo
+
+![image](../microrobot/images/microrobot%20in%20gazeebo.png)
+
+```bash
+$source ../devel/setup.bash
+$roslaunch microrobot gazebo.launch 
+```
+
+### March 11 2022
+
+inertia work
+![image](../microrobot/images/inertia_tensor_cylinder.png)
+
+### March 9 2022
 
 inertia work, eccentrers
 ![image](../microrobot/images/inertia.png)

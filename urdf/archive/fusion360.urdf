@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+
+<robot name="microrobot">
+
+    <link name="dummy_link">
+        <!-- [ WARN] [1647026126.424341897]: The root link platform_link has an 
+                inertia specified in the URDF, but KDL does not support a root link with
+                an inertia.  As a workaround, you can add an extra dummy link to your 
+                URDF.  -->
+        <origin rpy="0 0 -0"
+                xyz="0 0 0.2"/>
+    </link>
+    
+    <joint name="dl_to_platform" type="fixed">
+        <parent link="dummy_link"/>
+        <child link="platform_link"/>
+    </joint>
+
+    <link name="platform_link">
+        
+        <visual>
+            <geometry>
+                <mesh filename="package://microrobot/meshes/scrap/Low_poly_v2.stl" 
+                      scale="0.001 0.001 0.001"/>
+            </geometry>
+        </visual>
+
+        <collision>
+            <geometry>
+                <mesh filename="package://microrobot/meshes/scrap/Low_poly_v2.stl" 
+                      scale="0.001 0.001 0.001"/>
+            </geometry>
+
+            <!-- <surface>
+                <friction>
+                    <ode>
+                        <mu>0.4</mu>
+                    </ode>
+                </friction>
+            </surface> -->
+        </collision>
+
+        <inertial>
+            <!-- 0.120  -->
+            <mass value="0.120"/>
+            <inertia ixx="0.0000187899" 
+                    ixy="0.0" ixz="0.0" 
+                    iyy="0.0000187899"  
+                    iyz="0" 
+                    izz="0.000037499996" />
+        </inertial>
+    </link>
+
+    <link name="left_eccenter">
+        <visual>
+            <origin rpy="1.571 0 1.571"/>
+            <geometry>
+                <mesh filename="package://microrobot/models/Eccenter_v3.stl" 
+                    scale="0.001 0.001 0.001"/>
+            </geometry>
+        </visual>
+
+        <collision>
+            <origin rpy="1.571 0 1.571"/>
+            <geometry>
+                <mesh filename="package://microrobot/models/Eccenter_v3.stl" 
+                      scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+
+        <inertial>
+            <mass value="0.00021"/>
+            <inertia ixx="0.000000000239" 
+                ixy="0.0" ixz="0.0" 
+                iyy="0.000000000271"  
+                iyz="-0.000000000002" 
+                izz="0.000000000344" />
+        </inertial>
+    </link>
+
+
+    <joint name="left_eccenter_joint" type="continuous">
+        <parent link="platform_link"/>
+        <child link="left_eccenter"/>
+        <!-- <dynamics damping="0.0" friction="0.001"/> -->
+        <axis xyz="1 0 0"/>
+        <origin xyz="0.022 0 0.004"/>
+    </joint> 
+
+    <link name="right_eccenter">
+        <visual>
+            <origin rpy="1.571 0 -1.571"/>
+            <geometry>
+            <mesh filename="package://microrobot/models/Eccenter_v3.stl" 
+                  scale="0.001 0.001 0.001"/>
+            </geometry>
+        </visual>
+
+        <collision>
+            <origin rpy="1.571 0 -1.571"/>
+            <geometry>
+                <mesh filename="package://microrobot/models/Eccenter_v3.stl" 
+                      scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+
+        <inertial>
+            <mass value="0.00021"/>
+            <inertia ixx="0.000000000239" 
+                ixy="0.0" ixz="0.0" 
+                iyy="0.000000000271"  
+                iyz="-0.000000000002" 
+                izz="0.000000000344" />
+        </inertial>
+    </link>
+    
+    <joint name="right_eccenter_joint" type="continuous">
+        <parent link="platform_link"/>
+        <child link="right_eccenter"/>
+        <!-- <dynamics damping="0.0" friction="0.001"/> -->
+        <axis xyz="1 0 0"/>
+        <origin xyz="-0.022 0 0.004"/>
+    </joint>
+
+    <gazebo reference="platform_link">
+        <mu1>0.4</mu1>
+    </gazebo>
+
+</robot>

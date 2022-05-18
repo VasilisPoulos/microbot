@@ -1,6 +1,6 @@
 <launch>
 
-  <arg name="model" default="$(find microrobot)/urdf/tutorial.urdf"/>
+  <arg name="model" default="$(find microrobot)/urdf/tutorial.urdf.xacro"/>
   <arg name="gui" default="true" />
   <arg name="rvizconfig" default="$(find microrobot)/rviz/urdf.rviz" />
 
