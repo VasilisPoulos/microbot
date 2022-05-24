@@ -8,6 +8,10 @@ project(microrobot)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  urdf
+  controller_manager
+  joint_state_controller
+  robot_state_publisher
   roscpp
   rospy
   std_msgs

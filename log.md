@@ -57,6 +57,27 @@ Topics gui
 rqt
 ```
 
+xacro to urdf, and check urdf validity
+
+```shell
+xacro microbot.urdf.xacro -o test.urdf
+
+check_urdf test.urdf
+```
+
+launch empty gazebo world
+
+```bash
+roslaunch gazebo_ros empty_world.launch
+```
+
+spawn model in gazebo
+
+```shell
+rosrun gazebo_ros spawn_model -file test.urdf -urdf -model test
+
+```
+
 ### Turtlebot3 Spec
 
 Its characteristics and specificities
@@ -70,16 +91,11 @@ Its characteristics and specificities
 - Total weight (including SBC, battery and sensors): 1 kg.
 - Charging time: 2h30.
 
-## Todo
-
-*sorted by importance*
-
-- [ ] Experiment with constant v_des.
-- [ ] Read more about PID's.
-- [ ] Make a better blender model.
-- [ ] Make a launch file.
-
 ## Completed
+
+### May 14 2022
+
+working xacro.
 
 ### March 14 2022
 
