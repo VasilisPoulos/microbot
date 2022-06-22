@@ -119,11 +119,11 @@
         <type>transmission_interface/SimpleTransmission</type>
         
         <joint name="platform_to_left_eccenter_joint">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/VelocityJointInterface </hardwareInterface>
         </joint>
         
         <actuator name="l_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/VelocityJointInterface </hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
 
@@ -134,11 +134,11 @@
         <type>transmission_interface/SimpleTransmission</type>
 
         <joint name="platform_to_right_eccenter_joint">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/VelocityJointInterface </hardwareInterface>
         </joint>
         
         <actuator name="r_motor">
-            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <hardwareInterface>hardware_interface/VelocityJointInterface </hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
 
