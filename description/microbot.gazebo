@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<robot>
+
+    <gazebo reference="right_eccenter_link">
+        <material>Gazebo/Blue</material>
+    </gazebo>
+
+    <gazebo reference="left_eccenter_link">
+        <material>Gazebo/Blue</material>
+    </gazebo>
+
+    <gazebo reference="platform_link">
+        <mu1 value="0.4"/>
+        <mu2 value="0.4"/>
+        <material>Gazebo/White</material>
+    </gazebo>
+
+    <gazebo>
+		<plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+			<robotNamespace>/microbot</robotNamespace>
+            <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+		</plugin>
+	</gazebo>
+
+</robot>

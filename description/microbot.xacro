@@ -1,0 +1,147 @@
+<?xml version="1.0"?>
+<robot name="microrobot" xmlns:xacro="http://www.ros.org/wiki/xacro" >
+    
+    <!-- Import all Gazebo-customization elements, including Gazebo colors -->
+    <xacro:include filename="microbot.gazebo" />
+    
+    <!-- Constants for robot dimensions -->
+    <xacro:property name="left_eccenter_position">
+        <origin xyz="0 0.057 0.008" rpy="0 0 0" />
+    </xacro:property>
+
+    <xacro:property name="right_eccenter_position">
+        <origin xyz="0 -0.057 0.008" rpy="0 0 -3.14" />
+    </xacro:property>
+
+    <xacro:property name="mesh_offset">
+        <origin xyz="0 0 -0.002" rpy="0 0 0" />
+    </xacro:property>
+
+    <!-- Base Link -->
+    <link name="base_link">
+    </link>
+
+    <joint name="platform_joint" type="fixed">
+        <parent link="base_link"></parent>
+        <child link="platform_link"></child>
+    </joint>
+
+    <!-- Platform link -->
+    <link name="platform_link">
+
+        <inertial>
+            <mass value="122"/>
+            <inertia ixx="0.144"  ixy="0"  ixz="0" iyy="0.083" iyz="0" izz="0.225" />
+        </inertial>
+
+        <visual>
+            <geometry>
+                <mesh filename="package://microrobot/meshes/large_platform_mesh_001.stl"/>
+            </geometry>
+        </visual>
+
+        <collision>
+            <geometry>
+                <mesh filename="package://microrobot/meshes/large_platform_mesh_001.stl"/>
+            </geometry>
+        </collision>
+
+    </link>
+    
+    <!-- Left eccenter link -->
+    <link name="left_eccenter_link">
+
+        <inertial>
+            <xacro:insert_block name="mesh_offset" />
+            <mass value="1.825"/>
+            <inertia ixx="7.94e-06"  ixy="0"  ixz="0" iyy="1.15e-05" iyz="0" izz="1.431e-05" />
+        </inertial>
+
+        <visual>
+            <xacro:insert_block name="mesh_offset" />
+            <geometry>
+                <mesh filename="package://microrobot/meshes/large_eccenter_mesh_001.stl"/>
+            </geometry>
+        </visual>
+
+        <collision>
+            <xacro:insert_block name="mesh_offset" />
+            <geometry>
+                <mesh filename="package://microrobot/meshes/large_eccenter_mesh_001.stl"/>
+            </geometry>
+        </collision>
+
+    </link>
+
+    <joint name="platform_to_left_eccenter_joint" type="continuous">
+        <xacro:insert_block name="left_eccenter_position" />
+        <parent link="platform_link"/>
+        <child link="left_eccenter_link"/>
+        <axis xyz="0 1 0"/>
+        <dynamics damping="0.0005" friction="0.0"/>
+    </joint>
+
+    <!-- Right eccenter link -->
+    <link name="right_eccenter_link">
+
+        <inertial>
+            <xacro:insert_block name="mesh_offset" />
+            <mass value="1.825"/>
+            <inertia ixx="7.94e-06"  ixy="0"  ixz="0" iyy="1.15e-05" iyz="0" izz="1.431e-05" />
+        </inertial>
+
+        <visual>
+            <xacro:insert_block name="mesh_offset" />         
+            <geometry>
+                <mesh filename="package://microrobot/meshes/large_eccenter_mesh_001.stl"/>
+            </geometry>
+        </visual>
+
+        <collision>
+            <xacro:insert_block name="mesh_offset" />
+            <geometry>
+                <mesh filename="package://microrobot/meshes/large_eccenter_mesh_001.stl"/>
+            </geometry>
+        </collision>
+
+    </link>
+    
+    <joint name="platform_to_right_eccenter_joint" type="continuous">
+        <xacro:insert_block name="right_eccenter_position" />
+        <parent link="platform_link" />
+        <child link="right_eccenter_link" />
+        <axis xyz="0 1 0"/>
+        <dynamics damping="0.0005" friction="0.0"/>
+    </joint>
+
+    <transmission name="left_motor_transmition">
+
+        <type>transmission_interface/SimpleTransmission</type>
+        
+        <joint name="platform_to_left_eccenter_joint">
+            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        </joint>
+        
+        <actuator name="l_motor">
+            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+
+    </transmission>
+
+	<transmission name="right_motor_transmition">
+        
+        <type>transmission_interface/SimpleTransmission</type>
+
+        <joint name="platform_to_right_eccenter_joint">
+            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        </joint>
+        
+        <actuator name="r_motor">
+            <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+
+    </transmission>
+
+</robot>
