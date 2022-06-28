@@ -17,3 +17,14 @@ microbot:
     pid:
       p: 1.0
       i: 0.01
+
+/gazebo_ros_control:
+    pid_gains:
+      left_joint_controller:
+        p: 1.0
+        i: 0.01
+        d: 0.0
+      right_joint_controller:
+        p: 1.0
+        i: 0.01
+        d: 0.0

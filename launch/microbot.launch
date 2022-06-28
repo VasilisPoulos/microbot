@@ -3,12 +3,15 @@
     <!-- Launch gazebo with an empty world -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
         <arg name="paused" default="false" />
-		<arg name="use_sim_time" default="true" />
+		<arg name="use_sim_time" default="false" />
 		<arg name="gui" default="true" />
 		<arg name="headless" default="false" />
 		<arg name="debug" default="false" />
     </include>
 
+    <!-- ros_control  launch file -->
+    <include file="$(find microrobot)/launch/control.launch" />
+    
     <!-- Robot model -->
     <param name="/robot_description" 
         command="$(find xacro)/xacro 
@@ -17,5 +20,5 @@
     <!-- Spawn the robot model -->
     <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
         args="-param /robot_description -urdf -model microbot" />
-        
+
 </launch>
