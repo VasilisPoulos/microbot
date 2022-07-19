@@ -15,6 +15,10 @@
         <material>Gazebo/White</material>
     </gazebo>
 
+    <gazebo reference="imu_link">
+        <material>Gazebo/Red</material>
+    </gazebo>
+
     <gazebo>
 		<plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
 			<robotNamespace>/microbot</robotNamespace>
@@ -42,4 +46,5 @@
         <pose>0 0 0 0 0 0</pose>
         </sensor>
     </gazebo>
+    
 </robot>

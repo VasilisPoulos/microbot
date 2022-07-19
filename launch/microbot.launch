@@ -3,7 +3,7 @@
     <!-- Launch gazebo with an empty world -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
         <arg name="paused" default="false" />
-		<arg name="use_sim_time" default="false" />
+		<arg name="use_sim_time" default="true" />
 		<arg name="gui" default="true" />
 		<arg name="headless" default="false" />
 		<arg name="debug" default="false" />
@@ -12,6 +12,19 @@
     <!-- ros_control  launch file -->
     <include file="$(find microrobot)/launch/control.launch" />
     
+    <!-- Camera model -->
+    <param name="/camera_description" 
+        command="$(find xacro)/xacro 
+        '$(find microrobot)/description/camera.xacro'" />
+
+    <!-- Spawn the camera model -->
+    <node name="spawn_camera" pkg="gazebo_ros" type="spawn_model"
+        args="-param /camera_description -urdf -model camera" />
+    
+    <!-- Translate camera to posiiton -->
+    <!-- <node pkg="tf" type="static_transform_publisher" name="link1_broadcaster" 
+        args="0 0 1 0 0 0 0 0 camera_link 100" /> -->
+
     <!-- Robot model -->
     <param name="/robot_description" 
         command="$(find xacro)/xacro 
@@ -20,5 +33,17 @@
     <!-- Spawn the robot model -->
     <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
         args="-param /robot_description -urdf -model microbot" />
+
+    <!-- robot localization -->
+    <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true">
+        <rosparam command="load" file="$(find microrobot)/config/ekf_template.yaml" />
+
+        <!--  Placeholder for output topic remapping
+        You either remap on this node, the node that takes in the data, or both!
+        <remap from="accel/filtered" to=""/>
+        -->
+        <remap from="odometry/filtered" to="/odom"/>
+
+    </node>
 
 </launch>

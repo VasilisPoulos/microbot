@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from re import X
 from typing import Tuple as tuple
 import numpy as np
 import scipy.special as sc
@@ -216,6 +215,7 @@ class Clothoid:
         return symmetrical_path
 
     def __curve_exceeded_finish(self, curve):
+        # TODO: rewrite?
         return True if curve[-1][0] > self.finish[0] or \
             curve[-1][1] > self.finish[1] else False
 
@@ -227,10 +227,10 @@ class Clothoid:
         x_line, x_line_direction = self.__calculate_x_axis_line_segment(left_curve_path)  
         right_curve_half = self.__calculate_symmetric_curve_segment(left_curve_path)
         curve_path = np.vstack([left_curve_path, right_curve_half])
-        if self.__curve_exceeded_finish(curve_path): 
-            print('Invalid input, clothoid exceeded trajectory finish.'\
-                + ' Try reducing max_dev.')
-            exit(-1)
+        # if self.__curve_exceeded_finish(curve_path): 
+        #     print('Invalid input, clothoid exceeded trajectory finish.'\
+        #         + ' Try reducing max_dev.')
+        #     exit(-1)
         
         right_direction_half =  self.__mirror_direction(left_curve_direction)
         curve_direction = np.concatenate([left_curve_direction, right_direction_half])
@@ -239,7 +239,7 @@ class Clothoid:
     
         path_wo_y_line = np.vstack([x_line, curve_path])
         complete_path = np.vstack([path_wo_y_line, y_line]) 
-
+        
         direction_wo_y_line = np.append(x_line_direction, curve_direction)
         complete_direction = np.append(direction_wo_y_line, y_line_direction)
 
@@ -258,7 +258,10 @@ class Clothoid:
 
     def plot(self) -> None:
         plt.style.use('seaborn-whitegrid')
-        plt.subplot(1, 2, 1)
+
+        fig = plt.figure()
+        #ax = plt.subplot(1, 1, 1)
+
         plt.title('Clothoid Curve ')
         plt.xlabel("x-axis (m)")
         plt.ylabel("y-axis (m)")
@@ -268,27 +271,27 @@ class Clothoid:
         plt.annotate("start", (self.start[0], self.start[1]))
 
         plt.annotate("x0", (self.curve_start[0], self.curve_start[1]))
-        
+
         plt.scatter(self.control_point[0], self.control_point[1], c='m')
         plt.scatter(self.intersection[0], self.intersection[1], c='blue')
-        plt.axis('scaled')
+        #plt.axis('scaled')
 
-        plt.subplot(1, 2, 2)
-        plt.plot(range(0, len(self.direction)), self.direction, \
-             linestyle='dashed', marker='o', c='lightcoral')
-        plt.title('Direction')
-        plt.xlabel("Number of clothoid point")
-        plt.ylabel("Angle (deg)")
+        # plt.subplot(1, 2, 2)
+        # plt.plot(range(0, len(self.direction)), self.direction, \
+        #      linestyle='dashed', marker='o', c='lightcoral')
+        # plt.title('Direction')
+        # plt.xlabel("Number of clothoid point")
+        # plt.ylabel("Angle (deg)")
         plt.show()
 
 def test_main():
-    s1 = np.array([0., 0., 1.])
-    p = np.array([0.2, 0., 1.])
-    s2 = np.array([0.2, 0.6, 1.])
+    s1 = np.array([0., 0., 1])
+    p = np.array([1., 0., 1.])
+    s2 = np.array([0., 1., 1.])
     # TODO: catch 180 deg case in a function that handles the user input.
     c1 = Clothoid(s1, p, s2, max_dev=0.1, num_of_points=10)
     print(c1.path)
+    print(np.degrees(c1.angle))
     c1.plot()
-    #print(c1.angle)
 if __name__ == '__main__':
     test_main()
