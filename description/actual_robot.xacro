@@ -1,0 +1,115 @@
+<?xml version="1.0"?>
+<robot name="microrobot" xmlns:xacro="http://www.ros.org/wiki/xacro" >
+    
+    <!-- Import all Gazebo-customization elements, including Gazebo colors -->
+    <xacro:include filename="actual_microbot.gazebo" />
+
+    <!-- Robot Constants -->
+    <xacro:property name="damping" value="0.000000001" />
+
+    <xacro:property name="left_eccenter_position">
+        <origin xyz="0 0.022 0.0042" rpy="0 0 0" />
+    </xacro:property>
+
+    <xacro:property name="right_eccenter_position">
+        <origin xyz="0 -0.022 0.0042" rpy="0 0 -3.14" />
+    </xacro:property>
+
+    <xacro:property name="mesh_offset">
+        <origin xyz="0 0.0015 -0.001" rpy="0 0 0" />
+    </xacro:property>
+
+    <!-- Base Link -->
+    <link name="base_link">
+    </link>
+
+    <joint name="platform_joint" type="fixed">
+        <parent link="base_link"></parent>
+        <child link="platform_link"></child>
+    </joint>
+
+    <!-- Platform link -->
+    <link name="platform_link">
+
+        <inertial>
+            <mass value="0.018563072"/>
+            <inertia ixx="0.000003360"  ixy="0"  ixz="0" iyy="0.000002453" 
+                iyz="0" izz="0.000005762" />
+        </inertial>
+
+        <visual>
+            <geometry>
+                <mesh scale="0.001 0.001 0.001" filename="package://microrobot/meshes/microbot_platform_5d.stl"/>
+            </geometry>
+        </visual>
+
+        <collision>
+            <geometry>
+                <mesh scale="0.001 0.001 0.001" filename="package://microrobot/meshes/microbot_platform_5d.stl"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Left eccenter link -->
+    <link name="left_eccenter_link">
+
+        <inertial>
+            <xacro:insert_block name="mesh_offset" />
+            <mass value="0.000147969"/>
+            <inertia ixx="1.523e-10"  ixy="0"  ixz="0" iyy="1.893e-10" iyz="0" izz="2.589e-10" />
+        </inertial>
+
+        <visual>
+            <geometry>
+                <mesh scale="0.001 0.001 0.001" filename="package://microrobot/meshes/microbot_eccenter_5d.stl"/>
+            </geometry>
+        </visual>
+
+        <collision>
+            <geometry>
+                <mesh scale="0.001 0.001 0.001" filename="package://microrobot/meshes/microbot_eccenter_5d.stl"/>
+            </geometry>
+        </collision>
+
+    </link>
+
+    <joint name="platform_to_left_eccenter_joint" type="continuous">
+        <xacro:insert_block name="left_eccenter_position" />
+        <parent link="platform_link"/>
+        <child link="left_eccenter_link"/>
+        <axis xyz="0 1 0"/>
+        <dynamics damping="${damping}" friction="0.0"/>
+    </joint>
+
+    <!-- Right eccenter link -->
+    <link name="right_eccenter_link">
+
+        <inertial>
+            <xacro:insert_block name="mesh_offset" />
+            <mass value="0.000147969"/>
+            <inertia ixx="1.523e-10"  ixy="0"  ixz="0" iyy="1.893e-10" iyz="0" izz="2.589e-10" />
+        </inertial>
+
+        <visual>
+            <geometry>
+                <mesh scale="0.001 0.001 0.001" filename="package://microrobot/meshes/microbot_eccenter_5d.stl"/>
+            </geometry>
+        </visual>
+
+        <collision>
+            <geometry>
+                <mesh scale="0.001 0.001 0.001" filename="package://microrobot/meshes/microbot_eccenter_5d.stl"/>
+            </geometry>
+        </collision>
+
+    </link>
+
+    <joint name="platform_to_right_eccenter_joint" type="continuous">
+        <xacro:insert_block name="right_eccenter_position" />
+        <parent link="platform_link"/>
+        <child link="right_eccenter_link"/>
+        <axis xyz="0 1 0"/>
+        <dynamics damping="${damping}" friction="0.0"/>
+    </joint>
+
+</robot>

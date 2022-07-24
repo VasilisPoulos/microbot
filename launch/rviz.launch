@@ -1,10 +1,7 @@
 <launch>
   <param name="robot_description"
-    command="$(find xacro)/xacro --inorder '$(find microrobot)/description/microbot.xacro'" />
-
-  <!-- REP-105 (Coordinate Frame Conventions) -->
-  <node pkg="tf" type="static_transform_publisher" name="base_link_broadcaster" args="0 0 0 0 0 0 odom base_link 30" />
-
+    command="$(find xacro)/xacro --inorder '$(find microrobot)/description/actual_robot.xacro'" />
+  
   <!-- send fake joint values -->
   <node name="joint_state_publisher" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui">
   </node>
