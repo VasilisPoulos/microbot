@@ -7,7 +7,7 @@
     <link name="camera base"></link>
 
     <joint name="my_joint" type="fixed">
-        <origin xyz="0 0 1" rpy="0 1.57 0"/>
+        <origin xyz="0 0 0.15" rpy="0 1.57 0"/>
         <parent link="camera base"/>
         <child link="camera_link"/>
     </joint>
@@ -47,8 +47,8 @@
             <format>R8G8B8</format>
             </image>
             <clip>
-            <near>0.1</near>
-            <far>100</far>
+            <near>0.001</near>
+            <far>10</far>
             </clip>
             <noise>
             <type>gaussian</type>

@@ -1,0 +1,45 @@
+General
+	Part Number	platform eccenter
+	Part Name	platform eccenter v3
+	Description
+	Material Name	Steel
+
+Manage
+	Item Number
+	Lifecycle
+	Revision
+	State	Working
+	Change Order
+
+Physical
+	Mass	0,000147969 kg
+	Volume	0,000000019 m^3
+	Density	7850,000000000 kg / m^3
+	Area	0,000043416 m^2
+	World X,Y,Z	0,000000000 m, 0,000000000 m, 0,000000000 m
+	Center of Mass	0,000000000 m, 0,000000000 m, 0,000151174 m
+	Bounding Box
+		Length	0,004000000 m
+		Width	0,003000000 m
+		Height	0,002000000 m
+	Moment of Inertia at Center of Mass   (kg m^2)
+		Ixx	1.523E-10
+		Ixy	0,000000000
+		Ixz	0,000000000
+		Iyx	0,000000000
+		Iyy	1.893E-10
+		Iyz	0,000000000
+		Izx	0,000000000
+		Izy	0,000000000
+		Izz	2.589E-10
+	Moment of Inertia at Origin   (kg m^2)
+		Ixx	1.557E-10
+		Ixy	0,000000000
+		Ixz	0,000000000
+		Iyx	0,000000000
+		Iyy	1.927E-10
+		Iyz	0,000000000
+		Izx	0,000000000
+		Izy	0,000000000
+		Izz	2.589E-10
+

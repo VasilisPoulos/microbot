@@ -28,7 +28,7 @@
     <!-- Robot model -->
     <param name="/robot_description" 
         command="$(find xacro)/xacro 
-        '$(find microrobot)/description/microbot.xacro'" />
+        '$(find microrobot)/description/actual_robot.xacro'" />
 
     <!-- Spawn the robot model -->
     <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
