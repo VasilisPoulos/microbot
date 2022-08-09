@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot name="microrobot" xmlns:xacro="http://www.ros.org/wiki/xacro" >
     
-    <!-- Import all Gazebo-customization elements, including Gazebo colors -->
+    <!-- Import all Gazebo-customization elements, including Gazebo colors --> 
     <xacro:include filename="actual_microbot.gazebo" />
 
     <!-- Robot Constants -->
@@ -22,7 +22,6 @@
     </xacro:property>
 
     <!-- Inertial Macros -->
-
     <xacro:macro name="inertial_box" params="mass x y z *origin">
         <inertial>
             <xacro:insert_block name="origin"/>
@@ -53,7 +52,7 @@
 
         <visual>
             <geometry>
-                <mesh scale="0.001 0.001 0.001" filename="package://microrobot/meshes/ar_platform.dae"/>
+                <mesh scale="0.001 0.001 0.001" filename="package://microrobot/meshes/platform visual v2.stl"/>
             </geometry>
         </visual>
 
@@ -127,7 +126,6 @@
     </joint>
 
     <!-- IMU link -->
-
     <link name="imu_link">
 
         <xacro:inertial_box mass="0.00001" x="0.001" y="0.001" z="0.001">
@@ -137,7 +135,7 @@
         <visual>
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <geometry>
-            <box size="0.001 0.001 0.001"/>
+                <box size="0.001 0.001 0.001"/>
             </geometry>
         </visual>
         
@@ -157,9 +155,38 @@
         <child link="imu_link"/>
     </joint>
 
-    <!-- Transmitions -->
+    <!-- AR tag -->
+    <link name="ar_tag_link">
 
-        <transmission name="left_motor_transmition">
+        <xacro:inertial_box mass="0.00001" x="0.03" y="0.03" z="0.005">
+            <origin xyz="0.0005 0 0.0005" rpy="0 0 0"/>
+        </xacro:inertial_box>
+        
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="package://microrobot/meshes/ar_tag_3cm.dae"/>
+            </geometry>
+        </visual>
+        
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="package://microrobot/meshes/ar_tag_3cm.dae"/>
+            </geometry>
+        </collision>
+
+    </link>
+
+    <joint name="ar_tag_joint" type="fixed">
+        <axis xyz="1 0 0"/>      
+        <origin xyz="0 0 0.014"/>
+        <parent link="platform_link"/>
+        <child link="ar_tag_link"/>
+    </joint>
+
+    <!-- Transmitions -->
+    <transmission name="left_motor_transmition">
 
         <type>transmission_interface/SimpleTransmission</type>
         
