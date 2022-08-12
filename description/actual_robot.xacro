@@ -5,16 +5,18 @@
     <xacro:include filename="actual_microbot.gazebo" />
 
     <!-- Robot Constants -->
-    <xacro:property name="motor_damping" value="0.000000001" />
+    <xacro:property name="motor_damping" value="0.00000000" />
+
+    <xacro:property name="motor_friction" value="0.00000" />
 
     <xacro:property name="platform_height" value="0.0008" />
 
     <xacro:property name="left_eccenter_position">
-        <origin xyz="0 0.022 0.003" rpy="0 0 0" />
+        <origin xyz="0 0.022 0.0032" rpy="0 0 0" />
     </xacro:property>
 
     <xacro:property name="right_eccenter_position">
-        <origin xyz="0 -0.022 0.003" rpy="0 0 -3.14" />
+        <origin xyz="0 -0.022 0.0032" rpy="0 0 -3.14" />
     </xacro:property>
 
     <xacro:property name="mesh_mass_center_offset">
@@ -45,14 +47,14 @@
     <link name="platform_link">
 
         <inertial>
-            <mass value="0.012348768"/>
-            <inertia ixx="0.000002377"  ixy="0"  ixz="0" iyy="0.000001470" 
-                iyz="0" izz="0.000003808" />
+            <mass value="0.100003017"/>
+            <inertia ixx="0.000019251"  ixy="0"  ixz="0" iyy="0.000011903" 
+                iyz="0" izz="0.000030834" />
         </inertial>
 
         <visual>
             <geometry>
-                <mesh scale="0.001 0.001 0.001" filename="package://microrobot/meshes/platform visual v2.stl"/>
+                <mesh scale="0.001 0.001 0.001" filename="package://microrobot/meshes/platform collision mesh v7.stl"/>
             </geometry>
         </visual>
 
@@ -68,8 +70,8 @@
 
         <inertial>
             <xacro:insert_block name="mesh_mass_center_offset" />
-            <mass value="0.000147969"/>
-            <inertia ixx="1.523e-10"  ixy="0"  ixz="0" iyy="1.893e-10" iyz="0" izz="2.589e-10" />
+            <mass value="0.000208337"/>
+            <inertia ixx="2.145e-10"  ixy="0"  ixz="0" iyy="2.666e-10" iyz="0" izz="3.646e-10" />
         </inertial>
 
         <visual>
@@ -91,7 +93,7 @@
         <parent link="platform_link"/>
         <child link="left_eccenter_link"/>
         <axis xyz="0 1 0"/>
-        <dynamics damping="${motor_damping}" friction="0.0"/>
+        <dynamics damping="${motor_damping}" friction="${motor_friction}"/>
     </joint>
 
     <!-- Right eccenter link -->
@@ -99,8 +101,8 @@
 
         <inertial>
             <xacro:insert_block name="mesh_mass_center_offset" />
-            <mass value="0.000147969"/>
-            <inertia ixx="1.523e-10"  ixy="0"  ixz="0" iyy="1.893e-10" iyz="0" izz="2.589e-10" />
+            <mass value="0.000208337"/>
+            <inertia ixx="2.145e-10"  ixy="0"  ixz="0" iyy="2.666e-10" iyz="0" izz="3.646e-10" />
         </inertial>
 
         <visual>
@@ -122,7 +124,7 @@
         <parent link="platform_link"/>
         <child link="right_eccenter_link"/>
         <axis xyz="0 1 0"/>
-        <dynamics damping="${motor_damping}" friction="0.0"/>
+        <dynamics damping="${motor_damping}" friction="${motor_friction}"/>
     </joint>
 
     <!-- IMU link -->

@@ -7,8 +7,8 @@
     <node name="controller_spawner" pkg="controller_manager" type="spawner" 
         respawn="false" output="screen" ns="/microbot"
         args="
-        left_joint_controller 
-        right_joint_controller
+        left_joint_velocity_controller 
+        right_joint_velocity_controller
         joint_state_controller"/>
 
      <!-- convert joint states to TF transforms for rviz, etc -->

@@ -1,0 +1,93 @@
+General
+	Part Number	actual platform
+	Part Name	actual platform v2
+	Description
+	Material Name	Steel
+
+Manage
+	Item Number
+	Lifecycle
+	Revision
+	State	Working
+	Change Order
+
+Physical
+	Mass	0,018563072 kg
+	Volume	0,000002365 m^3
+	Density	7850,000000000 kg / m^3
+	Area	0,004548825 m^2
+	World X,Y,Z	0,000000000 m, 0,000000000 m, 0,000000000 m
+	Center of Mass	0,000000000 m, 0,000000000 m, 0,001948615 m
+	Bounding Box
+		Length	0,050000000 m
+		Width	0,050000000 m
+		Height	0,006400000 m
+	Moment of Inertia at Center of Mass   (kg m^2)
+		Ixx	0,000003360
+		Ixy	0,000000000
+		Ixz	0,000000000
+		Iyx	0,000000000
+		Iyy	0,000002453
+		Iyz	0,000000000
+		Izx	0,000000000
+		Izy	0,000000000
+		Izz	0,000005762
+	Moment of Inertia at Origin   (kg m^2)
+		Ixx	0,000003431
+		Ixy	0,000000000
+		Ixz	0,000000000
+		Iyx	0,000000000
+		Iyy	0,000002523
+		Iyz	0,000000000
+		Izx	0,000000000
+		Izy	0,000000000
+		Izz	0,000005762
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++
+HEAVY
+
+General
+	Part Number	platform collision mesh
+	Part Name	platform collision mesh v7
+	Description
+	Material Name	Heavy Steel
+
+Manage
+	Item Number
+	Lifecycle
+	Revision
+	State	Working
+	Change Order
+
+Physical
+	Mass	0,100003017 kg
+	Volume	0,000001573 m^3
+	Density	63571,010317846 kg / m^3
+	Area	0,004458850 m^2
+	World X,Y,Z	0,000000000 m, 0,000000000 m, 0,000000000 m
+	Center of Mass	0,000000000 m, 0,000000000 m, 0,001127672 m
+	Bounding Box
+		Length	0,050000000 m
+		Width	0,050000000 m
+		Height	0,005200000 m
+	Moment of Inertia at Center of Mass   (kg m^2)
+		Ixx	0,000019251
+		Ixy	0,000000000
+		Ixz	0,000000000
+		Iyx	0,000000000
+		Iyy	0,000011903
+		Iyz	0,000000000
+		Izx	0,000000000
+		Izy	0,000000000
+		Izz	0,000030834
+	Moment of Inertia at Origin   (kg m^2)
+		Ixx	0,000019379
+		Ixy	0,000000000
+		Ixz	0,000000000
+		Iyx	0,000000000
+		Iyy	0,000012030
+		Iyz	0,000000000
+		Izx	0,000000000
+		Izy	0,000000000
+		Izz	0,000030834
+

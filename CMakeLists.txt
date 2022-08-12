@@ -186,6 +186,7 @@ catkin_install_python(PROGRAMS
   src/microrobot/scripts/clothoids.py
   src/microrobot/services/clothoid_service.py
   src/microrobot/nodes/controller.py
+  src/microrobot/nodes/low_level_controller.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

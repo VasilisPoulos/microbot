@@ -4,27 +4,17 @@ microbot:
     type: joint_state_controller/JointStateController
     publish_rate: 50  
 
-  left_joint_controller:
+  left_joint_velocity_controller:
     type: velocity_controllers/JointVelocityController 
     joint: platform_to_left_eccenter_joint
-    pid:
-      p: 1.0
-      i: 0.01
 
-  right_joint_controller:
+  right_joint_velocity_controller:
     type: velocity_controllers/JointVelocityController     
     joint: platform_to_right_eccenter_joint
-    pid:
-      p: 1.0
-      i: 0.01
 
-/gazebo_ros_control:
+  gazebo_ros_control:
     pid_gains:
-      left_joint_controller:
-        p: 1.0
-        i: 0.01
-        d: 0.0
-      right_joint_controller:
-        p: 1.0
-        i: 0.01
-        d: 0.0
+      platform_to_left_eccenter_joint:
+        p: 0.0000001
+      platform_to_right_eccenter_joint:
+        p: 0.0000001
