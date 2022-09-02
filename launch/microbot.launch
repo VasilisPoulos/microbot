@@ -2,7 +2,7 @@
 
     <!-- Launch gazebo with an empty world -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
-        <arg name="paused" default="true" />
+        <arg name="paused" default="false" />
 		<arg name="use_sim_time" default="true" />
 		<arg name="gui" default="true" />
 		<arg name="headless" default="false" />
@@ -20,10 +20,7 @@
     <!-- Spawn the camera model -->
     <node name="spawn_camera" pkg="gazebo_ros" type="spawn_model"
         args="-param /camera_description -urdf -model camera" />
-    
-    <!-- Translate camera to posiiton -->
-    <!-- <node pkg="tf" type="static_transform_publisher" name="link1_broadcaster" 
-        args="0 0 1 0 0 0 0 0 camera_link 100" /> -->
+
 
     <!-- Robot model -->
     <param name="/robot_description" 
@@ -34,7 +31,30 @@
     <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
         args="-param /robot_description -urdf -model microbot" />
 
-    <!-- robot localization -->
+
+    <!-- AR tracking package -->
+    <arg name="marker_size"          default="3.0" />
+    <arg name="max_new_marker_error" default="0.05" />
+    <arg name="max_track_error"      default="0.05" />
+
+    <arg name="cam_image_topic"      default="/microbot/camera1/image_raw" />
+    <arg name="cam_info_topic"       default="/microbot/camera1/camera_info" />
+    <arg name="output_frame"         default="/camera_link" />
+
+    <node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect" 
+        respawn="false" output="screen">
+
+		<param name="marker_size"           type="double" value="$(arg marker_size)" />
+		<param name="max_new_marker_error"  type="double" value="$(arg max_new_marker_error)" />
+		<param name="max_track_error"       type="double" value="$(arg max_track_error)" />
+		<param name="output_frame"          type="string" value="$(arg output_frame)" />
+
+		<remap from="camera_image"  to="$(arg cam_image_topic)" />
+		<remap from="camera_info"   to="$(arg cam_info_topic)" />
+
+	</node>
+
+    <!-- robot localization package-->
     <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true">
         <rosparam command="load" file="$(find microrobot)/config/ekf_template.yaml" />
 

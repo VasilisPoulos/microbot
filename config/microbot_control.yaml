@@ -12,6 +12,7 @@ microbot:
     type: velocity_controllers/JointVelocityController     
     joint: platform_to_right_eccenter_joint
 
+  #TODO: proper pid values may reduce jitter?
   gazebo_ros_control:
     pid_gains:
       platform_to_left_eccenter_joint:

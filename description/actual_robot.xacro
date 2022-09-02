@@ -12,11 +12,11 @@
     <xacro:property name="platform_height" value="0.0008" />
 
     <xacro:property name="left_eccenter_position">
-        <origin xyz="0 0.022 0.0032" rpy="0 0 0" />
+        <origin xyz="0 0.022 0.003" rpy="0 0 0" />
     </xacro:property>
 
     <xacro:property name="right_eccenter_position">
-        <origin xyz="0 -0.022 0.0032" rpy="0 0 -3.14" />
+        <origin xyz="0 -0.022 0.003" rpy="0 0 -3.14" />
     </xacro:property>
 
     <xacro:property name="mesh_mass_center_offset">
@@ -160,21 +160,21 @@
     <!-- AR tag -->
     <link name="ar_tag_link">
 
-        <xacro:inertial_box mass="0.00001" x="0.03" y="0.03" z="0.005">
+        <xacro:inertial_box mass="0.00001" x="0.03" y="0.03" z="0.001">
             <origin xyz="0.0005 0 0.0005" rpy="0 0 0"/>
         </xacro:inertial_box>
         
         <visual>
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <geometry>
-                <mesh filename="package://microrobot/meshes/ar_tag_3cm.dae"/>
+                <mesh filename="package://microrobot/ar_tags/ar_tag_0_3cm.dae"/>
             </geometry>
         </visual>
         
         <collision>
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <geometry>
-                <mesh filename="package://microrobot/meshes/ar_tag_3cm.dae"/>
+                <mesh filename="package://microrobot/ar_tags/ar_tag_0_3cm.dae"/>
             </geometry>
         </collision>
 

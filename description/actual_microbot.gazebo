@@ -16,6 +16,12 @@
     <gazebo reference="platform_link">
         <mu1 value="0.4"/>
         <mu2 value="0.4"/>
+        <maxVel value="1"/> <!-- was 0.01 --> 
+        <kp value="1e6"/> <!--6-->
+        <kd value="1e3"/> <!-- 3 -->
+        <minDepth value="0.0"/>
+        <iters value="100"/>
+        <!-- <maxContacts value="3"/> -->
         <material>Gazebo/White</material>
     </gazebo>
 
@@ -30,7 +36,7 @@
     
     <!-- IMU library -->
 
-      <gazebo reference="imu_link">
+    <gazebo reference="imu_link">
         <gravity>true</gravity>
         <sensor name="imu_sensor" type="imu">
         <always_on>true</always_on>
@@ -38,7 +44,7 @@
         <visualize>true</visualize>
         <topic>__default_topic__</topic>
         <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
-            <topicName>microbot\imu</topicName>
+            <topicName>microbot/imu</topicName>
             <bodyName>imu_link</bodyName>
             <updateRateHZ>500.0</updateRateHZ>
             <gaussianNoise>0.0</gaussianNoise>

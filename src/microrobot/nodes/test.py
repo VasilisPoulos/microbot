@@ -26,8 +26,8 @@ if __name__ == '__main__':
         rospy.on_shutdown(reset_speed)
 
         while not rospy.is_shutdown():
-            left_motor_publisher.publish(-1000.0)
-            right_motor_publisher.publish(1000.0)
+            left_motor_publisher.publish(3500.0)
+            right_motor_publisher.publish(0000.0)
             rate.sleep()
 
     except rospy.ROSInterruptException:
