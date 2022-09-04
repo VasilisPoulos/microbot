@@ -54,6 +54,9 @@
 
 	</node>
 
+    <!-- Start visual odometry -->
+    <node pkg="microrobot" type="ar_tag_odometry.py" name="visual_odometry"/>
+
     <!-- robot localization package-->
     <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true">
         <rosparam command="load" file="$(find microrobot)/config/ekf_template.yaml" />
