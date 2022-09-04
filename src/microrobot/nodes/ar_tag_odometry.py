@@ -12,11 +12,21 @@ def alvar_callback(msg):
     
     x = -msg.markers[0].pose.pose.position.x
     y = msg.markers[0].pose.pose.position.y
+    z = msg.markers[0].pose.pose.position.z
+    quartenion_x = -msg.markers[0].pose.pose.orientation.x
+    quartenion_y = msg.markers[0].pose.pose.orientation.y
+    quartenion_z = msg.markers[0].pose.pose.orientation.z
+    quartenion_w = msg.markers[0].pose.pose.orientation.w
+    
     current_time = rospy.Time.now()
     odometry_message.header.stamp = current_time
     odometry_message.header.frame_id = "odom"
     odometry_message.child_frame_id = "base_link"
-    odometry_message.pose.pose = Pose(Point(x, y, 0), Quaternion(0, 0, 0, 0))
+    odometry_message.pose.pose = Pose(Point(x, y, z), 
+        Quaternion(quartenion_x, quartenion_y, quartenion_z, quartenion_w))
+
+    # TODO: I don't have speed information, but i could calculate it from the 
+    # info above.
     odometry_message.twist.twist = Twist(Vector3(0, 0, 0), Vector3(0, 0, 0))
 
 if __name__ == '__main__':

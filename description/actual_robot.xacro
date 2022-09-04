@@ -5,6 +5,7 @@
     <xacro:include filename="actual_microbot.gazebo" />
 
     <!-- Robot Constants -->
+    <!-- TODO: damping and friction may limit jitter -->
     <xacro:property name="motor_damping" value="0.00000000" />
 
     <xacro:property name="motor_friction" value="0.00000" />
