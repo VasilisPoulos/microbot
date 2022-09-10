@@ -17,9 +17,11 @@
         <mu1 value="0.4"/>
         <mu2 value="0.4"/>
         <!-- <maxVel value="1"/> was 0.01  -->
-        <kp value="1e6"/> <!-- 6 -->
-        <kd value="1e3"/> <!-- 3 -->
-        <minDepth value="0.001"/>
+        <!-- <kp value="1e6"/>  -->
+        <!-- 6 -->
+        <!-- <kd value="1e3"/>  -->
+        <!-- 3 -->
+        <!-- <minDepth value="0.001"/> -->
         <!-- <maxContacts value="3"/> -->
         <material>Gazebo/White</material>
     </gazebo>
