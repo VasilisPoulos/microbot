@@ -6,9 +6,9 @@
 
     <!-- Robot Constants -->
     <!-- TODO: damping and friction may limit jitter -->
-    <xacro:property name="motor_damping" value="1e-7" /> <!-- highest damping possible 0.000001-->
+    <xacro:property name="motor_damping" value="0.0" />
 
-    <xacro:property name="motor_friction" value="0.0" />
+    <xacro:property name="motor_friction" value="1e-4" />
 
     <xacro:property name="platform_height" value="0.0008" />
 
