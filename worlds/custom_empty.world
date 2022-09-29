@@ -9,7 +9,7 @@
         <real_time_update_rate>1000</real_time_update_rate>
         <ode>
           <solver>
-            <type>world</type>
+            <type>quick</type>
             <iters>50</iters>
             <sor>1.4</sor>
           </solver>
@@ -88,6 +88,7 @@
               </clip>
           </camera>
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+              <cameraName>camera_0</cameraName>
               <frameName>camera_link</frameName>
           </plugin>
         </sensor>
