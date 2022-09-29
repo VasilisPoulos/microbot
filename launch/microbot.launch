@@ -1,15 +1,16 @@
 <launch>
-    <!-- Launch gazebo with an empty world -->
-    <include file="$(find gazebo_ros)/launch/empty_world.launch">
-        <arg name="world_name" value="$(find microrobot)/worlds/custom_empty.world"/>
-        <arg name="paused" default="true" />
-		<arg name="use_sim_time" default="true" />
-		<arg name="gui" default="true" />
-		<arg name="headless" default="false" />
-		<arg name="debug" default="false" />
-        <arg name="verbose" value="false"/>
-        <arg name="physics" value="ode"/>
-    </include>
+    <arg name="robot_name"/>
+    <arg name="init_pose"/>
+
+    <!-- Robot model -->
+    <param name="/robot_description" 
+        command="$(find xacro)/xacro 
+        '$(find microrobot)/description/actual_robot.xacro'" />
+
+    <!-- Spawn the robot model -->
+    <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
+        args="-param /robot_description -urdf $(arg init_pose) 
+                -model $(arg robot_name) " />
 
     <!-- Loading Controllers -->
     <!-- Load joint controller configurations from YAML file to parameter server -->
@@ -23,33 +24,13 @@
         right_joint_velocity_controller
         joint_state_controller"/> -->
 
-     <!-- convert joint states to TF transforms for rviz, etc -->
-    <!-- <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+    <!-- convert joint states to TF transforms for rviz, etc -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
         respawn="false" output="screen">
-        <remap from="/joint_states" to="/microbot/joint_states" />
-    </node> -->
-    
-    <!-- Camera model -->
-    <!-- <param name="/camera_description" 
-        command="$(find xacro)/xacro 
-        '$(find microrobot)/description/camera.xacro'" /> -->
-
-    <!-- Spawn the camera model -->
-    <!-- <node name="spawn_camera" pkg="gazebo_ros" type="spawn_model"
-        args="-param /camera_description -urdf -model camera" /> -->
-
-
-    <!-- Robot model -->
-    <param name="/robot_description" 
-        command="$(find xacro)/xacro 
-        '$(find microrobot)/description/actual_robot.xacro'" />
-
-    <!-- Spawn the robot model -->
-    <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
-        args="-param /robot_description -urdf -z 0.965 -model microbot " />
+    </node>
 
     <!-- Autostart circles for simulation stability testing -->
-    <node pkg="microrobot" type="test.py" name="sim_stability_testing"/>
+    <!-- <node pkg="microrobot" type="test.py" name="sim_stability_testing"/> -->
 
     <!-- AR tracking package -->
     <!-- <arg name="marker_size"          default="3.0" />
@@ -63,15 +44,15 @@
     <node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect" 
         respawn="false" output="screen">
 
-		<param name="marker_size"           type="double" value="$(arg marker_size)" />
-		<param name="max_new_marker_error"  type="double" value="$(arg max_new_marker_error)" />
-		<param name="max_track_error"       type="double" value="$(arg max_track_error)" />
-		<param name="output_frame"          type="string" value="$(arg output_frame)" />
+        <param name="marker_size"           type="double" value="$(arg marker_size)" />
+        <param name="max_new_marker_error"  type="double" value="$(arg max_new_marker_error)" />
+        <param name="max_track_error"       type="double" value="$(arg max_track_error)" />
+        <param name="output_frame"          type="string" value="$(arg output_frame)" />
 
-		<remap from="camera_image"  to="$(arg cam_image_topic)" />
-		<remap from="camera_info"   to="$(arg cam_info_topic)" />
+        <remap from="camera_image"  to="$(arg cam_image_topic)" />
+        <remap from="camera_info"   to="$(arg cam_info_topic)" />
 
-	</node> -->
+    </node> -->
 
     <!-- Start visual odometry -->
     <!-- <node pkg="microrobot" type="ar_tag_odometry.py" name="visual_odometry"/> -->
@@ -87,5 +68,4 @@
         <!-- <remap from="odometry/filtered" to="/odom"/>
 
     </node> -->
-
 </launch>

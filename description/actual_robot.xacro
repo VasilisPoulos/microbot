@@ -184,7 +184,7 @@
     </joint> -->
 
     <!-- AR tag -->
-    <!-- <link name="ar_tag_link">
+    <link name="ar_tag_link">
 
         <xacro:inertial_box mass="0.00001" x="0.03" y="0.03" z="0.001">
             <origin xyz="0.0005 0 0.0005" rpy="0 0 0"/>
@@ -211,7 +211,7 @@
         <origin xyz="0 0 0.014"/>
         <parent link="platform_link"/>
         <child link="ar_tag_link"/>
-    </joint> -->
+    </joint>
 
     <!-- Transmitions -->
     <!-- <transmission name="left_motor_transmition">

@@ -1,0 +1,22 @@
+<launch>
+    <!-- Launch gazebo with custom world -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find microrobot)/worlds/custom_empty.world"/>
+        <arg name="paused" default="true" />
+		<arg name="use_sim_time" default="true" />
+		<arg name="gui" default="true" />
+		<arg name="headless" default="false" />
+		<arg name="debug" default="false" />
+        <arg name="verbose" value="false"/>
+        <arg name="physics" value="ode"/>
+    </include>
+
+    <!-- Spawn microbot 0 -->
+    <group ns="microbot_0">
+        <param name="tf_prefix" value="microbot_0_tf" />
+        <include file="$(find microrobot)/launch/microbot.launch" >
+            <arg name="robot_name"  value="microbot_0" />
+            <arg name="init_pose" value="-z 0.965" />
+        </include>
+    </group>
+</launch>

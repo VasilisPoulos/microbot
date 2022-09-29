@@ -67,7 +67,7 @@
         </visual>
 
         <sensor type="camera" name="camera_0">
-          <update_rate>30.0</update_rate>
+          <update_rate>60.0</update_rate>
           <visualize>true</visualize>
           <camera name="head">
               <horizontal_fov>1.078</horizontal_fov>
@@ -84,6 +84,7 @@
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
               <cameraName>camera_0</cameraName>
               <frameName>camera_link</frameName>
+              <robotNamespace>microbot_0</robotNamespace>
           </plugin>
         </sensor>
       </link>
@@ -127,7 +128,6 @@
             </script>
           </material>
         </visual>
-
       </link>
 
     </model>
