@@ -7,21 +7,36 @@
 		<arg name="gui" default="true" />
 		<arg name="headless" default="false" />
 		<arg name="debug" default="false" />
-        <arg name="verbose" value="true"/>
-        <arg name="physics" value="dart"/>
+        <arg name="verbose" value="false"/>
+        <arg name="physics" value="ode"/>
     </include>
 
-    <!-- ros_control  launch file -->
-    <include file="$(find microrobot)/launch/control.launch" />
+    <!-- Loading Controllers -->
+    <!-- Load joint controller configurations from YAML file to parameter server -->
+    <!-- <rosparam file="$(find microrobot)/config/microbot_control.yaml" command="load"/> -->
+
+    <!-- Load the controllers -->
+    <!-- <node name="controller_spawner" pkg="controller_manager" type="spawner" 
+        respawn="false" output="screen" ns="/microbot"
+        args="
+        left_joint_velocity_controller 
+        right_joint_velocity_controller
+        joint_state_controller"/> -->
+
+     <!-- convert joint states to TF transforms for rviz, etc -->
+    <!-- <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+        respawn="false" output="screen">
+        <remap from="/joint_states" to="/microbot/joint_states" />
+    </node> -->
     
     <!-- Camera model -->
-    <param name="/camera_description" 
+    <!-- <param name="/camera_description" 
         command="$(find xacro)/xacro 
-        '$(find microrobot)/description/camera.xacro'" />
+        '$(find microrobot)/description/camera.xacro'" /> -->
 
     <!-- Spawn the camera model -->
-    <node name="spawn_camera" pkg="gazebo_ros" type="spawn_model"
-        args="-param /camera_description -urdf -model camera" />
+    <!-- <node name="spawn_camera" pkg="gazebo_ros" type="spawn_model"
+        args="-param /camera_description -urdf -model camera" /> -->
 
 
     <!-- Robot model -->
@@ -31,11 +46,11 @@
 
     <!-- Spawn the robot model -->
     <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
-        args="-param /robot_description -urdf -model microbot" />
+        args="-param /robot_description -urdf -z 0.965 -model microbot " />
 
 
     <!-- AR tracking package -->
-    <arg name="marker_size"          default="3.0" />
+    <!-- <arg name="marker_size"          default="3.0" />
     <arg name="max_new_marker_error" default="0.05" />
     <arg name="max_track_error"      default="0.05" />
 
@@ -54,21 +69,21 @@
 		<remap from="camera_image"  to="$(arg cam_image_topic)" />
 		<remap from="camera_info"   to="$(arg cam_info_topic)" />
 
-	</node>
+	</node> -->
 
     <!-- Start visual odometry -->
-    <node pkg="microrobot" type="ar_tag_odometry.py" name="visual_odometry"/>
+    <!-- <node pkg="microrobot" type="ar_tag_odometry.py" name="visual_odometry"/> -->
 
     <!-- robot localization package-->
-    <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true">
-        <rosparam command="load" file="$(find microrobot)/config/ekf_template.yaml" />
+    <!-- <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true">
+        <rosparam command="load" file="$(find microrobot)/config/ekf_template.yaml" /> -->
 
         <!--  Placeholder for output topic remapping
         You either remap on this node, the node that takes in the data, or both!
         <remap from="accel/filtered" to=""/>
         -->
-        <remap from="odometry/filtered" to="/odom"/>
+        <!-- <remap from="odometry/filtered" to="/odom"/>
 
-    </node>
+    </node> -->
 
 </launch>

@@ -17,40 +17,56 @@ def reset_speed():
     right_motor_publisher.publish(0.0)
     rospy.loginfo('resetting speed...')
 
+def robot_reached_target(msg, x_desired, y_desired):
+    limit = 0.0005 # positive number for symmetric limits
+    x_current = msg.pose.pose.position.x
+    y_current = msg.pose.pose.position.y
+    if x_desired + limit > x_current > x_desired - limit and \
+       y_desired + limit > y_current > y_desired - limit:
+       return True
+    return False
+
 def model_speed(msg):
     global omega_motor_L, omega_motor_R
-    x_desired = 0.3
-    y_desired = 0.3
-    theta_desired = 0.30 
-    v_desired = 0.0005
+    x_desired = 0.03
+    y_desired = 0.0
+    theta_desired = 0.0
 
-    motor_bias = 2500
-    K_p1 = 11000
-    K_p2 = 1100
+    motor_bias = 2500 # min speed for robot to move
+    Kp_position = 15000
+    Kp_orientation = 900
 
     x_current = msg.pose.pose.position.x
     y_current = msg.pose.pose.position.y
     theta_current = msg.pose.pose.orientation.z
-    v_current = msg.twist.twist.linear.x
 
     x_error = x_desired - x_current
     y_error = y_desired - y_current
     theta_error = theta_desired - theta_current
+    euclidean_distance_error = math.sqrt(((x_error)**2) + ((y_error)**2))
     
-    #omega_motor = K_p1 * (v_desired - v_current)
-    omega_diff =  abs(K_p2 * (theta_desired - theta_current))
-    omega_motor = 2800 #K_p2 * (x_error)
-
-    omega_motor_R = omega_motor_L = omega_motor
+    omega_base = Kp_position * euclidean_distance_error + motor_bias
+    omega_diff =  abs(Kp_orientation * (theta_desired - theta_current))
+    
+    omega_motor_R = omega_motor_L = omega_base
     if theta_current > theta_desired:
-        omega_motor_L = omega_motor + omega_diff
+        omega_motor_L = omega_base + omega_diff
     else:
-        omega_motor_R = omega_motor + omega_diff
+        omega_motor_R = omega_base + omega_diff
     
+    if omega_motor_L > 5000:
+        omega_motor_L = 5000
 
+    if omega_motor_R > 5000:
+        omega_motor_R = 5000
+
+    if robot_reached_target(msg, x_desired, y_desired):
+        omega_motor_R = omega_motor_L = 0.0
+        rospy.signal_shutdown('stop')
+        exit()
    
-    rospy.loginfo("rpmL: %f, rpmR: %f, omega_diff: %f x: %f y: %f theta_error: %f", \
-        omega_motor_L, omega_motor_R, omega_diff, x_current, y_current, theta_error)
+    rospy.loginfo("rpmL: %f, rpmR: %f, omega_diff: %f x: %f y: %f theta_error: %f eucld_error %f", \
+        omega_motor_L, omega_motor_R, omega_diff, x_current, y_current, theta_error, euclidean_distance_error)
 
 if __name__ == '__main__':
     try:

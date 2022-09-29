@@ -2,13 +2,13 @@
 <robot name="microrobot" xmlns:xacro="http://www.ros.org/wiki/xacro" >
     
     <!-- Import all Gazebo-customization elements, including Gazebo colors --> 
-    <xacro:include filename="actual_microbot.gazebo" />
+    <!-- <xacro:include filename="actual_microbot.gazebo" /> -->
 
     <!-- Robot Constants -->
     <!-- TODO: damping and friction may limit jitter -->
-    <xacro:property name="motor_damping" value="0.00000001" />
+    <xacro:property name="motor_damping" value="0.0" />
 
-    <xacro:property name="motor_friction" value="0.0" />
+    <xacro:property name="motor_friction" value="1e-4" />
 
     <xacro:property name="platform_height" value="0.0008" />
 
@@ -79,9 +79,6 @@
                 <mesh scale="0.001 0.001 0.001" 
                     filename="package://microrobot/meshes/platform collision mesh v7.stl"/>
             </geometry>
-            <surface>
-                <bounce threshold = "1e6"/>
-            </surface>
         </collision>
     </link>
 
@@ -152,96 +149,5 @@
         <axis xyz="0 1 0"/>
         <dynamics damping="${motor_damping}" friction="${motor_friction}"/>
     </joint>
-
-    <!-- IMU link -->
-    <!-- <link name="imu_link">
-
-        <xacro:inertial_box mass="0.00001" x="0.001" y="0.001" z="0.001">
-            <origin xyz="0.0005 0 0.0005" rpy="0 0 0"/>
-        </xacro:inertial_box>
-        
-        <visual>
-            <origin rpy="0 0 0" xyz="0 0 0"/>
-            <geometry>
-                <box size="0.001 0.001 0.001"/>
-            </geometry>
-        </visual>
-        
-        <collision>
-            <origin rpy="0 0 0" xyz="0 0 0"/>
-            <geometry>
-                <box size="0.001 0.001 0.001"/>
-            </geometry>
-        </collision>
-
-    </link>
-
-    <joint name="imu_joint" type="fixed">
-        <axis xyz="1 0 0"/>      
-        <origin xyz="0 0 ${platform_height + 0.0005}"/>
-        <parent link="platform_link"/>
-        <child link="imu_link"/>
-    </joint> -->
-
-    <!-- AR tag -->
-    <!-- <link name="ar_tag_link">
-
-        <xacro:inertial_box mass="0.00001" x="0.03" y="0.03" z="0.001">
-            <origin xyz="0.0005 0 0.0005" rpy="0 0 0"/>
-        </xacro:inertial_box>
-        
-        <visual>
-            <origin rpy="0 0 1.57079633" xyz="0 0 0"/>
-            <geometry>
-                <mesh filename="package://microrobot/ar_tags/ar_tag_0_3cm.dae"/>
-            </geometry>
-        </visual>
-        
-        <collision>
-            <origin rpy="0 0 0" xyz="0 0 0"/>
-            <geometry>
-                <mesh filename="package://microrobot/ar_tags/ar_tag_0_3cm.dae"/>
-            </geometry>
-        </collision>
-
-    </link>
-
-    <joint name="ar_tag_joint" type="fixed">
-        <axis xyz="1 0 0"/>      
-        <origin xyz="0 0 0.014"/>
-        <parent link="platform_link"/>
-        <child link="ar_tag_link"/>
-    </joint> -->
-
-    <!-- Transmitions -->
-    <!-- <transmission name="left_motor_transmition">
-
-        <type>transmission_interface/SimpleTransmission</type>
-        
-        <joint name="platform_to_left_eccenter_joint">
-            <hardwareInterface>hardware_interface/VelocityJointInterface </hardwareInterface>
-        </joint>
-        
-        <actuator name="l_motor">
-            <hardwareInterface>hardware_interface/VelocityJointInterface </hardwareInterface>
-            <mechanicalReduction>1</mechanicalReduction>
-        </actuator>
-
-    </transmission>
-
-	<transmission name="right_motor_transmition">
-        
-        <type>transmission_interface/SimpleTransmission</type>
-
-        <joint name="platform_to_right_eccenter_joint">
-            <hardwareInterface>hardware_interface/VelocityJointInterface </hardwareInterface>
-        </joint>
-        
-        <actuator name="r_motor">
-            <hardwareInterface>hardware_interface/VelocityJointInterface </hardwareInterface>
-            <mechanicalReduction>1</mechanicalReduction>
-        </actuator>
-
-    </transmission> -->
-
+    
 </robot>

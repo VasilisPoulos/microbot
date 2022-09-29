@@ -14,30 +14,35 @@
     <!-- Platform Friction -->
 
     <gazebo reference="platform_link">
+        <material>Gazebo/Orange</material>
+         <!-- <collision>
+            <surface>
+                <bounce>
+                   <threshold>1e+06</threshold>
+                </bounce>
+            </surface>
+        </collision>
         <mu1 value="0.4"/>
-        <mu2 value="0.4"/>
-        <!-- <maxVel value="1"/> was 0.01  -->
-        <!-- <kp value="1e6"/>  -->
-        <!-- 6 -->
-        <!-- <kd value="1e3"/>  -->
-        <!-- 3 -->
-        <!-- <minDepth value="0.001"/> -->
-        <!-- <maxContacts value="3"/> -->
-        <material>Gazebo/White</material>
+        <mu2 value="0.4"/> 
+        <maxVel value="1e-6" />-->
+        <!-- <minDepth value="0.5e-6" />  -->
+        <minDepth value="2e-8" />
+        <!-- <kp value="1e25"/>  -->
+        <!-- <kd value="0.25e10"/> -->
     </gazebo>
 
     <!-- Controller library -->
 
-    <gazebo>
+    <!-- <gazebo>
 		<plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
 			<robotNamespace>/microbot</robotNamespace>
             <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
 		</plugin>
-	</gazebo>
+	</gazebo> -->
     
     <!-- IMU library -->
 
-    <gazebo reference="imu_link">
+    <!-- <gazebo reference="imu_link">
         <gravity>true</gravity>
         <sensor name="imu_sensor" type="imu">
         <always_on>true</always_on>
@@ -56,6 +61,6 @@
         </plugin>
         <pose>0 0 0 0 0 0</pose>
         </sensor>
-    </gazebo>
+    </gazebo> -->
     
 </robot>
