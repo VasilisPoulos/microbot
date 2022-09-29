@@ -15,18 +15,19 @@
 
     <gazebo reference="platform_link">
         <material>Gazebo/Orange</material>
-         <!-- <collision>
+        <collision>
             <surface>
                 <bounce>
-                   <threshold>1e+06</threshold>
+                    <restitution_coefficient>0</restitution_coefficient>
+                    <threshold>1e+10</threshold>
                 </bounce>
             </surface>
         </collision>
-        <mu1 value="0.4"/>
-        <mu2 value="0.4"/> 
-        <maxVel value="1e-6" />-->
+        <!-- <mu1 value="0.4"/>
+        <mu2 value="0.4"/>  -->
+        <maxVel value="0" />
         <!-- <minDepth value="0.5e-6" />  -->
-        <minDepth value="2e-8" />
+        <minDepth value="0" />
         <!-- <kp value="1e25"/>  -->
         <!-- <kd value="0.25e10"/> -->
     </gazebo>

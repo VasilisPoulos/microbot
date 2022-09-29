@@ -48,6 +48,8 @@
     <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
         args="-param /robot_description -urdf -z 0.965 -model microbot " />
 
+    <!-- Autostart circles for simulation stability testing -->
+    <node pkg="microrobot" type="test.py" name="sim_stability_testing"/>
 
     <!-- AR tracking package -->
     <!-- <arg name="marker_size"          default="3.0" />
