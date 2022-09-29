@@ -19,4 +19,13 @@
             <arg name="init_pose" value="-z 0.965" />
         </include>
     </group>
+
+    <!-- Spawn microbot 1 -->
+    <!-- <group ns="microbot_1">
+        <param name="tf_prefix" value="microbot_1_tf" />
+        <include file="$(find microrobot)/launch/microbot.launch" >
+            <arg name="robot_name"  value="microbot_1" />
+            <arg name="init_pose" value="-y 0.05 -z 0.965" />
+        </include>
+    </group> -->
 </launch>

@@ -6,16 +6,16 @@ odom_frame: odom            # Defaults to "odom" if unspecified
 base_link_frame: base_link  # Defaults to "base_link" if unspecified
 world_frame: odom           # Defaults to the value of odom_frame if unspecified
 
-odom0: /visual_odometry
+odom0: /microbot_0/visual_odometry
 odom0_config: [true,  true,  true,
                true, true, true,
                false, false, false,
                false, false, false,
                false, false, false]
 
-imu0: /microbot/imu
-imu0_config: [false,  false,  false,
-              false,  false,  false,
-              false,  false, false,
-              false, false, true,
-              true, false, false]
+# imu0: /microbot/imu
+# imu0_config: [false,  false,  false,
+#               false,  false,  false,
+#               false,  false, false,
+#               false, false, true,
+#               true, false, false]

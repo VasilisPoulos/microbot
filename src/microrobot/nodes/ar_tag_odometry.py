@@ -35,8 +35,9 @@ if __name__ == '__main__':
         rate = rospy.Rate(10)
         rospy.loginfo('Starting visual odometry')
         
-        alvar_marker_sub = rospy.Subscriber("/ar_pose_marker", AlvarMarkers, alvar_callback)
-        visual_odometry_pub = rospy.Publisher("/visual_odometry", Odometry, queue_size=1)
+        # TODO: Change node to accept an arg for the robots name
+        alvar_marker_sub = rospy.Subscriber("/microbot_0/ar_pose_marker", AlvarMarkers, alvar_callback)
+        visual_odometry_pub = rospy.Publisher("/microbot_0/visual_odometry", Odometry, queue_size=1)
 
         while not rospy.is_shutdown():
             visual_odometry_pub.publish(odometry_message)
