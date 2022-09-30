@@ -11,7 +11,7 @@ def alvar_callback(msg):
     global odometry_message
     
     x = -msg.markers[0].pose.pose.position.x
-    y = msg.markers[0].pose.pose.position.y
+    y = -msg.markers[0].pose.pose.position.y
     z = msg.markers[0].pose.pose.position.z
     quartenion_x = -msg.markers[0].pose.pose.orientation.x
     quartenion_y = msg.markers[0].pose.pose.orientation.y
