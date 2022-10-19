@@ -154,7 +154,7 @@
     </joint>
 
     <!-- IMU link -->
-    <!-- <link name="imu_link">
+    <link name="imu_link">
 
         <xacro:inertial_box mass="0.00001" x="0.001" y="0.001" z="0.001">
             <origin xyz="0.0005 0 0.0005" rpy="0 0 0"/>
@@ -181,7 +181,7 @@
         <origin xyz="0 0 ${platform_height + 0.0005}"/>
         <parent link="platform_link"/>
         <child link="imu_link"/>
-    </joint> -->
+    </joint>
 
     <!-- AR tag -->
     <link name="ar_tag_link">

@@ -10,13 +10,13 @@ odometry_message = Odometry()
 def alvar_callback(msg): 
     global odometry_message
     
-    x = -msg.markers[0].pose.pose.position.x
-    y = -msg.markers[0].pose.pose.position.y
+    x = - msg.markers[0].pose.pose.position.y
+    y = - msg.markers[0].pose.pose.position.x
     z = msg.markers[0].pose.pose.position.z
-    quartenion_x = -msg.markers[0].pose.pose.orientation.x
-    quartenion_y = msg.markers[0].pose.pose.orientation.y
-    quartenion_z = msg.markers[0].pose.pose.orientation.z
-    quartenion_w = msg.markers[0].pose.pose.orientation.w
+    quartenion_x = 0
+    quartenion_y = 0
+    quartenion_z = - msg.markers[0].pose.pose.orientation.y
+    quartenion_w = 0
     
     current_time = rospy.Time.now()
     odometry_message.header.stamp = current_time
@@ -31,17 +31,18 @@ def alvar_callback(msg):
 
 if __name__ == '__main__':
     try:
-        rospy.init_node("visual_odometry")
+        rospy.init_node("visual_odometry", log_level=rospy.WARN)
         rate = rospy.Rate(10)
         rospy.loginfo('Starting visual odometry')
         
         # TODO: Change node to accept an arg for the robots name
-        alvar_marker_sub = rospy.Subscriber("/microbot_0/ar_pose_marker", AlvarMarkers, alvar_callback)
-        visual_odometry_pub = rospy.Publisher("/microbot_0/visual_odometry", Odometry, queue_size=1)
+        alvar_marker_sub = rospy.Subscriber("/ar_pose_marker", AlvarMarkers, alvar_callback)
+        visual_odometry_pub = rospy.Publisher("/visual_odometry", Odometry, queue_size=1)
 
         while not rospy.is_shutdown():
             visual_odometry_pub.publish(odometry_message)
             rate.sleep()
 
     except rospy.ROSInterruptException:
+        rospy.logwarn('Visual odometry failed')
         pass

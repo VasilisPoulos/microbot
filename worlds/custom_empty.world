@@ -84,7 +84,6 @@
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
               <cameraName>camera_0</cameraName>
               <frameName>camera_link</frameName>
-              <robotNamespace>microbot_0</robotNamespace>
           </plugin>
         </sensor>
       </link>

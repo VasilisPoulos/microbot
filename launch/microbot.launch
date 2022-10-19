@@ -1,11 +1,27 @@
 <launch>
-    <arg name="robot_name"/>
-    <arg name="init_pose"/>
-
-    <!-- Robot model -->
-    <param name="/robot_description" 
-        command="$(find xacro)/xacro 
+    <arg name="robot_name"  value="microbot_0" />
+    <arg name="init_pose" value="-z 0.965" />
+    
+    <arg name="marker_size"          default="3.0" />
+    <arg name="max_new_marker_error" default="0.05" />
+    <arg name="max_track_error"      default="0.05" />
+    <arg name="cam_image_topic"      default="/camera_0/image_raw" />
+    <arg name="cam_info_topic"       default="/camera_0/camera_info" />
+    <arg name="output_frame"         default="/camera_link" />
+    <param name="/robot_description" command="$(find xacro)/xacro 
         '$(find microrobot)/description/actual_robot.xacro'" />
+
+    <!-- Launch gazebo with custom world -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find microrobot)/worlds/custom_empty.world"/>
+        <arg name="paused" default="true" />
+		<arg name="use_sim_time" default="true" />
+		<arg name="gui" default="true" />
+		<arg name="headless" default="false" />
+		<arg name="debug" default="false" />
+        <arg name="verbose" value="false"/>
+        <arg name="physics" value="ode"/>
+    </include>
 
     <!-- Spawn the robot model -->
     <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
@@ -33,14 +49,6 @@
     <!-- <node pkg="microrobot" type="test.py" name="sim_stability_testing"/> -->
 
     <!-- AR tracking package -->
-    <arg name="marker_size"          default="3.0" />
-    <arg name="max_new_marker_error" default="0.05" />
-    <arg name="max_track_error"      default="0.05" />
-
-    <arg name="cam_image_topic"      default="/$(arg robot_name)/camera_0/image_raw" />
-    <arg name="cam_info_topic"       default="/$(arg robot_name)/camera_0/camera_info" />
-    <arg name="output_frame"         default="/microbot_0_tf/camera_link" />
-
     <node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect" 
         respawn="false" output="screen">
 
@@ -51,15 +59,14 @@
 
         <remap from="camera_image"  to="$(arg cam_image_topic)" />
         <remap from="camera_info"   to="$(arg cam_info_topic)" />
-
     </node>
 
     <!-- Start visual odometry -->
     <node pkg="microrobot" type="visual_odometry.py" name="visual_odometry"/> 
 
     <!-- robot localization package-->
-    <!-- <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true">
-        <rosparam command="load" file="$(find microrobot)/config/ekf_template.yaml" />  -->
+    <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true">
+        <rosparam command="load" file="$(find microrobot)/config/ekf_template.yaml" /> 
 
         <!--  Placeholder for output topic remapping
         You either remap on this node, the node that takes in the data, or both!
@@ -67,5 +74,5 @@
         -->
         <!-- <remap from="odometry/filtered" to="/odom"/> -->
 
-    <!-- </node> -->
+    </node>
 </launch>
