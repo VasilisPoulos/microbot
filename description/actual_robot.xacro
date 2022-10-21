@@ -214,7 +214,7 @@
     </joint>
 
     <!-- Transmitions -->
-    <!-- <transmission name="left_motor_transmition">
+    <transmission name="left_motor_transmition">
 
         <type>transmission_interface/SimpleTransmission</type>
         
@@ -242,6 +242,6 @@
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
 
-    </transmission> -->
+    </transmission>
 
 </robot>

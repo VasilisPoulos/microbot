@@ -18,12 +18,12 @@
     </gazebo>
 
     <!-- Controller library -->
-    <!-- <gazebo>
+    <gazebo>
 		<plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
 			<robotNamespace>/microbot</robotNamespace>
             <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
 		</plugin>
-	</gazebo> -->
+	</gazebo>
     
     <!-- IMU library -->
     <gazebo reference="imu_link">
