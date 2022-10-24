@@ -16,6 +16,7 @@ microbot:
   gazebo_ros_control:
     pid_gains:
       platform_to_left_eccenter_joint:
-        p: 0.0000001
+        p: 0.000009
+
       platform_to_right_eccenter_joint:
-        p: 0.0000001
+        p: 0.000009
