@@ -2,46 +2,93 @@
 
 import rospy
 from std_msgs.msg import Float64
+from nav_msgs.msg import Odometry
+
+left_motor_topic = '/microbot/left_joint_velocity_controller/command'
+right_motor_topic = '/microbot/right_joint_velocity_controller/command'
+gazebo_pose_topic = '/gazebo/model_states/pose[3]'
+
+l_rpm = 1400.0
+r_rpm = -1400.0
+test_mode = False
+benchmark_0 = False
+benchmark_1 = False
+controlled = True
+
+def robot_pose(msg):
+    # rospy.loginfo('l_rpm: %f', msg.position.)
+    pass
+
+left_motor_publisher = rospy.Publisher(left_motor_topic, \
+    Float64, queue_size=10)
+right_motor_publisher = rospy.Publisher(right_motor_topic, \
+    Float64, queue_size=10)   
+# robot_pose_subscriber = rospy.Subscriber(gazebo_pose_topic, \
+#     Odometry, robot_pose)
+
 
 def reset_speed():
     left_motor_publisher.publish(0.0)
     right_motor_publisher.publish(0.0)
     rospy.loginfo('resetting speed...')
 
-l_rpm = 1600.0
-r_rpm = 1600.0
-test_mode = False
+def drive(rpm, reverse = 1, time = 1):
+    # reverse = 1 -> forward
+    # reverse = -1 -> backwards
+    l_rpm = -rpm*reverse
+    r_rpm = rpm*reverse
+    rospy.loginfo('l_rpm: %.1f r_rpm: %.1f', l_rpm, r_rpm)
+    left_motor_publisher.publish(l_rpm)
+    right_motor_publisher.publish(r_rpm)
+    rospy.sleep(time)
+    
+    # reset speed, sudden changes crash the sim
+    left_motor_publisher.publish(0.0)
+    right_motor_publisher.publish(0.0)
+    rospy.sleep(0.01)
+
+def rotate(rpm, direction = 1, time=3):
+    rospy.loginfo('l_rpm: %.1f r_rpm: %.1f', rpm*direction, \
+         rpm*direction)
+    left_motor_publisher.publish(rpm*direction)
+    right_motor_publisher.publish(rpm*direction)
+    rospy.sleep(time)
+
+    # reset speed, sudden changes crash the sim
+    left_motor_publisher.publish(0.0)
+    right_motor_publisher.publish(0.0)
+    rospy.sleep(0.01)
+
+def controlled_drive(direction=1, time=5):
+    # go straight with a p controller.
+    pass
 
 if __name__ == '__main__':
     try:
         rospy.init_node("testing_node")
-        rate = rospy.Rate(10)
-        
-        left_motor_publisher = rospy.Publisher( \
-            '/microbot/left_joint_velocity_controller/command', \
-            Float64, queue_size=1)
-        right_motor_publisher = rospy.Publisher( \
-            '/microbot/right_joint_velocity_controller/command', \
-            Float64, queue_size=1)        
-
-        left_set_point_publisher = rospy.Publisher( \
-            '/left_set_point', \
-            Float64, queue_size=1)    
-        
+        rate = rospy.Rate(10)       
         rospy.on_shutdown(reset_speed)
 
         while not rospy.is_shutdown():
-
+            rate.sleep()
             if test_mode:
                 l_rpm = float(input("new_rpm:"))
-                r_rpm = l_rpm
-
-            rospy.loginfo('l_rpm: %.1f r_rpm: %.1f', l_rpm, r_rpm)
-
-            left_set_point_publisher.publish(l_rpm)
-            left_motor_publisher.publish(l_rpm)
-            right_motor_publisher.publish(r_rpm)
-            rate.sleep()
+                r_rpm = -l_rpm
+                left_motor_publisher.publish(l_rpm)
+                right_motor_publisher.publish(r_rpm)
+                rate.sleep()
+            elif benchmark_0:
+                rpm_test_list = [1400, 1500, 1600, 1700, 1800]   
+                for rpm in rpm_test_list:
+                    drive(rpm, -1, 6)
+                    rate.sleep()
+                rospy.signal_shutdown('benchmark 0 done')
+            elif benchmark_1:
+                rate.sleep()
+                drive(1500.0, 1, 8)
+                rotate(1700, 1, 20)
+                drive(1500.0, 1, 8)
+                rospy.signal_shutdown('full benchmark done')
 
     except rospy.ROSInterruptException:
         pass

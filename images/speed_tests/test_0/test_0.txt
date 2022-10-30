@@ -1,0 +1,4 @@
+Robot moving in a straight line, increasing motor vel from 1500 to 1600, 1700 and finally 1800.
+
+linear speed is recorded from robot_localization which at this point a was not sure if it is
+accurate.
