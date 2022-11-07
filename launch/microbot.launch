@@ -1,4 +1,5 @@
 <launch>
+    <arg name="spawn_on_z" default="0.965" />
     <arg name="robot_name"  value="microbot_0" />
     <arg name="init_pose" value="-z 0.965" />
     
@@ -7,14 +8,14 @@
     <arg name="max_track_error"      default="0.05" />
     <arg name="cam_image_topic"      default="/camera_0/image_raw" />
     <arg name="cam_info_topic"       default="/camera_0/camera_info" />
-    <arg name="output_frame"         default="/camera_link" />
-    <param name="/robot_description" command="$(find xacro)/xacro 
+    <arg name="output_frame"         default="/camera_0_optical" />
+    <param name="robot_description" command="$(find xacro)/xacro 
         '$(find microrobot)/description/actual_robot.xacro'" />
 
     <!-- Launch gazebo with custom world -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
         <arg name="world_name" value="$(find microrobot)/worlds/custom_empty.world"/>
-        <arg name="paused" default="true" />
+        <arg name="paused" default="false" />
 		<arg name="use_sim_time" default="true" />
 		<arg name="gui" default="true" />
 		<arg name="headless" default="false" />
@@ -40,9 +41,12 @@
         right_joint_velocity_controller
         joint_state_controller"/>
 
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    </node>
+
     <!-- convert joint states to TF transforms for rviz, etc -->
-    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
-        respawn="false" output="screen">
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+      <remap from="/joint_states" to="/microbot/joint_states"/>  
     </node>
 
     <!-- Autostart circles for simulation stability testing -->
@@ -75,4 +79,12 @@
         <!-- <remap from="odometry/filtered" to="/odom"/> -->
 
     </node>
+    
+    <!-- TODO: warning, hardcoded positions -->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="camera_to_optical_tf" 
+        args="0 0 0.235 1.57 3.14 0 odom camera_0_optical" />
+    
+    <!-- Show in Rviz   -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find microrobot)/rviz/config.rviz"/>
+
 </launch>

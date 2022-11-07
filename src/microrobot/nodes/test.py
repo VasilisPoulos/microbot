@@ -11,9 +11,9 @@ gazebo_pose_topic = '/gazebo/model_states/pose[3]'
 l_rpm = 1400.0
 r_rpm = -1400.0
 test_mode = False
-benchmark_0 = False
+benchmark_0 = True
 benchmark_1 = False
-controlled = True
+controlled = False
 
 def robot_pose(msg):
     # rospy.loginfo('l_rpm: %f', msg.position.)
@@ -43,9 +43,9 @@ def drive(rpm, reverse = 1, time = 1):
     rospy.sleep(time)
     
     # reset speed, sudden changes crash the sim
-    left_motor_publisher.publish(0.0)
-    right_motor_publisher.publish(0.0)
-    rospy.sleep(0.01)
+    # left_motor_publisher.publish(0.0)
+    # right_motor_publisher.publish(0.0)
+    # rospy.sleep(0.01)
 
 def rotate(rpm, direction = 1, time=3):
     rospy.loginfo('l_rpm: %.1f r_rpm: %.1f', rpm*direction, \
@@ -80,7 +80,7 @@ if __name__ == '__main__':
             elif benchmark_0:
                 rpm_test_list = [1400, 1500, 1600, 1700, 1800]   
                 for rpm in rpm_test_list:
-                    drive(rpm, -1, 6)
+                    drive(rpm, 1, 6)
                     rate.sleep()
                 rospy.signal_shutdown('benchmark 0 done')
             elif benchmark_1:

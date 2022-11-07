@@ -13,10 +13,10 @@ def alvar_callback(msg):
     x = - msg.markers[0].pose.pose.position.y
     y = - msg.markers[0].pose.pose.position.x
     z = msg.markers[0].pose.pose.position.z
-    quartenion_x = 0
-    quartenion_y = 0
+    quartenion_x = msg.markers[0].pose.pose.orientation.w
+    quartenion_y = - msg.markers[0].pose.pose.orientation.z
     quartenion_z = - msg.markers[0].pose.pose.orientation.y
-    quartenion_w = 0
+    quartenion_w = - msg.markers[0].pose.pose.orientation.x
     
     current_time = rospy.Time.now()
     odometry_message.header.stamp = current_time
@@ -44,5 +44,5 @@ if __name__ == '__main__':
             rate.sleep()
 
     except rospy.ROSInterruptException:
-        rospy.logwarn('Visual odometry failed')
+        # rospy.logwarn('Visual odometry failed')
         pass
