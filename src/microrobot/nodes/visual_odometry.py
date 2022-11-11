@@ -2,28 +2,44 @@
 
 # TODO: rename, visual odometry
 import rospy
+import math
 from ar_track_alvar_msgs.msg import AlvarMarkers
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Point, Pose, Quaternion, Twist, Vector3
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
 odometry_message = Odometry()
 
 def alvar_callback(msg): 
     global odometry_message
     
-    x = - msg.markers[0].pose.pose.position.y
-    y = - msg.markers[0].pose.pose.position.x
-    z = msg.markers[0].pose.pose.position.z
-    quartenion_x = msg.markers[0].pose.pose.orientation.w
-    quartenion_y = - msg.markers[0].pose.pose.orientation.z
-    quartenion_z = - msg.markers[0].pose.pose.orientation.y
-    quartenion_w = - msg.markers[0].pose.pose.orientation.x
-    
+    # Constructing odom message
     current_time = rospy.Time.now()
     odometry_message.header.stamp = current_time
     odometry_message.header.frame_id = "odom"
     odometry_message.child_frame_id = "base_link"
+
+    marker_position = msg.markers[0].pose.pose.position
+    x = - marker_position.y
+    y = - marker_position.x
+    z = marker_position.z
+
+    marker_orientation = msg.markers[0].pose.pose.orientation
+    orientation_list = [marker_orientation.x, marker_orientation.y, \
+        marker_orientation.z, marker_orientation.w]
+    (roll, pitch, yaw) = euler_from_quaternion (orientation_list)
+    
+    fixed_yaw = - yaw - 1.57
+    fixed_orientation = quaternion_from_euler(roll, pitch, fixed_yaw)
+    rospy.logwarn('deg: %f -> %f', math.degrees(yaw), \
+        math.degrees(fixed_yaw))
+    
+    quartenion_x = fixed_orientation[0]
+    quartenion_y = fixed_orientation[1]
+    quartenion_z = fixed_orientation[2]
+    quartenion_w = fixed_orientation[3]
     odometry_message.pose.pose = Pose(Point(x, y, z), 
         Quaternion(quartenion_x, quartenion_y, quartenion_z, quartenion_w))
+
 
     # TODO: I don't have speed information, but i could calculate it from the 
     # info above.

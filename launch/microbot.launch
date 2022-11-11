@@ -83,6 +83,9 @@
     <!-- TODO: warning, hardcoded positions -->
     <node pkg="tf2_ros" type="static_transform_publisher" name="camera_to_optical_tf" 
         args="0 0 0.235 1.57 3.14 0 odom camera_0_optical" />
+
+    <node pkg="tf2_ros" type="static_transform_publisher" name="base_to_needle_tf" 
+        args="-0.0251 0 0 -3.14 0 0 base_link needle" />
     
     <!-- Show in Rviz   -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find microrobot)/rviz/config.rviz"/>
