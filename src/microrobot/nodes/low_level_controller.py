@@ -2,20 +2,47 @@
 
 import rospy
 import math
-#from geometry_msgs.msg import Twist 
-#from gazebo_msgs.msg import ModelStates
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Float64
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
+
+left_motor_topic = "/microbot/left_joint_velocity_controller/command"
+right_motor_topic = "/microbot/right_joint_velocity_controller/command"
+odometry_topic = "/visual_odometry"
 omega_motor_L = 0
 omega_motor_R = 0
-# def callback(data):
-#     rospy.loginfo(rospy.get_caller_id() + " heard linear %s angular %s", 
-#         data.linear.x, data.angular.z)
+x_current = 0
+y_current = 0
+theta_current = 0
+
+x_desired = 0.047
+y_desired = -0.089
+theta_desired_deg = 90 # in deg
+theta_desired = math.radians(theta_desired_deg)
+
+motor_bias = 1400 # min speed for robot to move
+Kp_position = 1000
+Kp_orientation = 400
 
 def reset_speed():
     left_motor_publisher.publish(0.0)
     right_motor_publisher.publish(0.0)
     rospy.loginfo('resetting speed...')
+
+def update_pose_and_orientation(msg):
+    global x_current, y_current, theta_current
+
+    robot_position = msg.pose.pose.position
+    robot_orientation = msg.pose.pose.orientation
+
+    x_current = robot_position.x
+    y_current = robot_position.y
+
+    orientation_list = [robot_orientation.x, robot_orientation.y, \
+        robot_orientation.z, robot_orientation.w]
+    (roll, pitch, yaw) = euler_from_quaternion (orientation_list)
+
+    theta_current = yaw
 
 def robot_reached_target(msg, x_desired, y_desired):
     limit = 0.0005 # positive number for symmetric limits
@@ -26,61 +53,67 @@ def robot_reached_target(msg, x_desired, y_desired):
        return True
     return False
 
-def model_speed(msg):
-    global omega_motor_L, omega_motor_R
-    x_desired = 0.03
-    y_desired = 0.0
-    theta_desired = 0.0
+def robot_reached_theta(theta_des, theta_current, acceptance_range):
+    if theta_des + acceptance_range > theta_current > theta_des - acceptance_range:
+       return True
+    return False
 
-    motor_bias = 2500 # min speed for robot to move
-    Kp_position = 15000
-    Kp_orientation = 900
+def limiter(limit):
+    global omega_motor_R, omega_motor_L
 
-    x_current = msg.pose.pose.position.x
-    y_current = msg.pose.pose.position.y
-    theta_current = msg.pose.pose.orientation.z
+    if omega_motor_L > limit:
+        omega_motor_L = limit
 
-    x_error = x_desired - x_current
-    y_error = y_desired - y_current
+    if omega_motor_R > limit:
+        omega_motor_R = limit
+
+def on_site_rotation_to(theta_desired):
+    global omega_motor_R, omega_motor_L
+
     theta_error = theta_desired - theta_current
-    euclidean_distance_error = math.sqrt(((x_error)**2) + ((y_error)**2))
+    omega_diff = Kp_orientation * abs((theta_desired - theta_current)) + motor_bias
     
-    omega_base = Kp_position * euclidean_distance_error + motor_bias
-    omega_diff =  abs(Kp_orientation * (theta_desired - theta_current))
-    
-    omega_motor_R = omega_motor_L = omega_base
-    if theta_current > theta_desired:
-        omega_motor_L = omega_base + omega_diff
+    if theta_current < theta_desired:
+        omega_motor_L =   omega_diff
+        omega_motor_R = - omega_diff
     else:
-        omega_motor_R = omega_base + omega_diff
+        omega_motor_L = - omega_diff
+        omega_motor_R =   omega_diff
     
-    if omega_motor_L > 5000:
-        omega_motor_L = 5000
+    limiter(1800)
 
-    if omega_motor_R > 5000:
-        omega_motor_R = 5000
+    rospy.loginfo("rpmL: %f, rpmR: %f, theta_current: %f, omega_diff: %f theta_error: %f", \
+        omega_motor_L, omega_motor_R, math.degrees(theta_current), omega_diff, theta_error)
 
-    if robot_reached_target(msg, x_desired, y_desired):
-        omega_motor_R = omega_motor_L = 0.0
-        rospy.signal_shutdown('stop')
-        exit()
+    if robot_reached_theta(theta_desired_deg, math.degrees(theta_current), 0.01):
+        reset_speed()
+        rospy.loginfo('Target reached')
+        return
+
+def controller(msg):
+    
+    update_pose_and_orientation(msg)
+
+    on_site_rotation_to(theta_desired)
+
+    # x_error = x_desired - x_current
+    # y_error = y_desired - y_current
+    # euclidean_distance_error = math.sqrt(((x_error)**2) + ((y_error)**2))
+    
+    #omega_base = Kp_position * euclidean_distance_error + motor_bias
+    
    
-    rospy.loginfo("rpmL: %f, rpmR: %f, omega_diff: %f x: %f y: %f theta_error: %f eucld_error %f", \
-        omega_motor_L, omega_motor_R, omega_diff, x_current, y_current, theta_error, euclidean_distance_error)
 
 if __name__ == '__main__':
     try:
         rospy.init_node("low_level_controller")
+        rospy.loginfo('Starting.')
         rate = rospy.Rate(10)
-        rospy.loginfo('started low_level_controller node')
         rospy.on_shutdown(reset_speed)
-
-        left_motor_topic = "/microbot/left_joint_velocity_controller/command"
-        right_motor_topic = "/microbot/right_joint_velocity_controller/command"
 
         left_motor_publisher = rospy.Publisher(left_motor_topic, Float64, queue_size=1)
         right_motor_publisher = rospy.Publisher(right_motor_topic, Float64, queue_size=1)
-        odometry_subscriber = rospy.Subscriber("/odom", Odometry, model_speed)
+        odometry_subscriber = rospy.Subscriber(odometry_topic, Odometry, controller)
         
         while not rospy.is_shutdown():
             left_motor_publisher.publish(omega_motor_L)

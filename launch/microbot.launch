@@ -88,6 +88,6 @@
         args="-0.0251 0 0 -3.14 0 0 base_link needle" />
     
     <!-- Show in Rviz   -->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find microrobot)/rviz/config.rviz"/>
+    <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find microrobot)/rviz/config.rviz"/> -->
 
 </launch>
