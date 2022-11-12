@@ -17,17 +17,16 @@ theta_current = 0
 
 x_desired = 0.047
 y_desired = -0.089
-theta_desired_deg = 90 # in deg
+theta_desired_deg = 0 # in deg
 theta_desired = math.radians(theta_desired_deg)
 
 motor_bias = 1400 # min speed for robot to move
 Kp_position = 1000
-Kp_orientation = 400
 
-def reset_speed():
+def stop_motors():
     left_motor_publisher.publish(0.0)
     right_motor_publisher.publish(0.0)
-    rospy.loginfo('resetting speed...')
+    rospy.loginfo('Stopping motors.')
 
 def update_pose_and_orientation(msg):
     global x_current, y_current, theta_current
@@ -63,13 +62,19 @@ def limiter(limit):
 
     if omega_motor_L > limit:
         omega_motor_L = limit
+    elif omega_motor_L < - limit:
+        omega_motor_L = - limit
 
     if omega_motor_R > limit:
         omega_motor_R = limit
+    elif omega_motor_R < - limit:
+        omega_motor_R = - limit
 
-def on_site_rotation_to(theta_desired):
+def on_site_rotation_to(theta_desired, accuracy=0.09):
     global omega_motor_R, omega_motor_L
 
+    # P controller
+    Kp_orientation = 400
     theta_error = theta_desired - theta_current
     omega_diff = Kp_orientation * abs((theta_desired - theta_current)) + motor_bias
     
@@ -85,10 +90,10 @@ def on_site_rotation_to(theta_desired):
     rospy.loginfo("rpmL: %f, rpmR: %f, theta_current: %f, omega_diff: %f theta_error: %f", \
         omega_motor_L, omega_motor_R, math.degrees(theta_current), omega_diff, theta_error)
 
-    if robot_reached_theta(theta_desired_deg, math.degrees(theta_current), 0.01):
-        reset_speed()
+    if robot_reached_theta(theta_desired_deg, math.degrees(theta_current), accuracy):
+        stop_motors()
         rospy.loginfo('Target reached')
-        return
+        rospy.signal_shutdown('Target reached')
 
 def controller(msg):
     
@@ -109,7 +114,7 @@ if __name__ == '__main__':
         rospy.init_node("low_level_controller")
         rospy.loginfo('Starting.')
         rate = rospy.Rate(10)
-        rospy.on_shutdown(reset_speed)
+        rospy.on_shutdown(stop_motors)
 
         left_motor_publisher = rospy.Publisher(left_motor_topic, Float64, queue_size=1)
         right_motor_publisher = rospy.Publisher(right_motor_topic, Float64, queue_size=1)

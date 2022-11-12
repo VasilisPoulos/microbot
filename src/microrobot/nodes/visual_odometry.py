@@ -30,8 +30,8 @@ def alvar_callback(msg):
     
     fixed_yaw = - yaw - 1.57
     fixed_orientation = quaternion_from_euler(roll, pitch, fixed_yaw)
-    rospy.logwarn('deg: %f -> %f', math.degrees(yaw), \
-        math.degrees(fixed_yaw))
+    # rospy.logwarn('deg: %f -> %f', math.degrees(yaw), \
+    #     math.degrees(fixed_yaw))
     
     quartenion_x = fixed_orientation[0]
     quartenion_y = fixed_orientation[1]
