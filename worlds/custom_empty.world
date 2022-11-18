@@ -142,6 +142,30 @@
 
     </model>
 
+    <!-- Goal Position Marker -->
+    <model name="Goal Marker">
+      <link name="link">
+        <gravity>0</gravity>
+        <pose>0.03 0.03 0.98 0 0 0 </pose>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.009</radius>
+              <length>0.03</length>
+            </cylinder>
+          </geometry>
+
+            <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/GreenTransparentOverlay</name>
+            </script>
+          </material>
+        </visual>
+
+      </link>
+    </model>
+
     <!-- Table -->
     <include name="table">
       <uri>model://table_marble</uri>
