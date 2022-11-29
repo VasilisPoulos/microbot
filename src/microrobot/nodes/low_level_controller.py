@@ -113,8 +113,8 @@ def go_to(x_desired, y_desired, theta_desired, accuracy=0.09):
     # P controller
     Kp_position = 400
     Kp_orientation = 1000
-    Kp_a = 300
-    Kp_b = 800
+    Kp_a = 200
+    Kp_b = 400
     tmp_motor_L = 0
     tmp_motor_R = 0
 
@@ -126,26 +126,26 @@ def go_to(x_desired, y_desired, theta_desired, accuracy=0.09):
     beta = theta_current + alpha - theta_desired
 
 
-    rpm = Kp_position * euclidean_distance_error + 2000
+    rpm = Kp_position * euclidean_distance_error + 1100
     rpm_diff = Kp_a * alpha + Kp_b * beta
     
     if rpm_diff > 0:
-        tmp_motor_R = - (rpm + rpm_diff)
-        tmp_motor_L = - rpm_diff
+        tmp_motor_R = 1400
+        tmp_motor_L = 1100
     else:
-        tmp_motor_R = - rpm_diff
-        tmp_motor_L = - (rpm - rpm_diff)
+        tmp_motor_R = 1100
+        tmp_motor_L = (rpm - rpm_diff)
 
     if 10 > math.degrees(alpha) > -10 and euclidean_distance_error > 0.005:
         if 10 > math.degrees(alpha): 
-            tmp_motor_R = - 2000
-            tmp_motor_L = - 2100
+            tmp_motor_R = 1000
+            tmp_motor_L = 1100
         elif math.degrees(alpha) > 10:
-            tmp_motor_R = - 2000
-            tmp_motor_L = - 2100
+            tmp_motor_R = 1000
+            tmp_motor_L = 1100
         else:
-            tmp_motor_R = - 2000
-            tmp_motor_L = - 2000
+            tmp_motor_R = 1200
+            tmp_motor_L = 1200
 
     if tmp_motor_R > 0 and motor_R < 0 or \
        tmp_motor_R < 0 and motor_R > 0 or \
@@ -158,7 +158,7 @@ def go_to(x_desired, y_desired, theta_desired, accuracy=0.09):
     motor_R = tmp_motor_R
     motor_L = tmp_motor_L
 
-    limiter(2200)
+    limiter(1400)
     rospy.loginfo("rpmL: %f, rpmR: %f, x_current: %f, y_current: %f theta_current: %f\nrpm_diff: %f euclidean_error: %f a: %f b: %f", \
         motor_L, motor_R, x_current, y_current, 
         math.degrees(theta_current), rpm_diff, euclidean_distance_error, \

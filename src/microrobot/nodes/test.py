@@ -10,10 +10,11 @@ gazebo_pose_topic = '/gazebo/model_states/pose[3]'
 
 l_rpm = 1400.0
 r_rpm = -1400.0
-test_mode = False
-benchmark_0 = True
-benchmark_1 = False
-controlled = False
+test_mode = 0
+benchmark_0 = 1
+benchmark_1 = 0
+benchmark_2 = 0
+controlled = 0
 
 def robot_pose(msg):
     # rospy.loginfo('l_rpm: %f', msg.position.)
@@ -25,7 +26,6 @@ right_motor_publisher = rospy.Publisher(right_motor_topic, \
     Float64, queue_size=10)   
 # robot_pose_subscriber = rospy.Subscriber(gazebo_pose_topic, \
 #     Odometry, robot_pose)
-
 
 def reset_speed():
     left_motor_publisher.publish(0.0)
@@ -40,18 +40,28 @@ def drive(rpm, reverse = 1, time = 1):
     rospy.loginfo('l_rpm: %.1f r_rpm: %.1f', l_rpm, r_rpm)
     left_motor_publisher.publish(l_rpm)
     right_motor_publisher.publish(r_rpm)
-    rospy.sleep(time)
-    
     # reset speed, sudden changes crash the sim
     # left_motor_publisher.publish(0.0)
     # right_motor_publisher.publish(0.0)
     # rospy.sleep(0.01)
+    rospy.sleep(time)
 
 def rotate(rpm, direction = 1, time=3):
     rospy.loginfo('l_rpm: %.1f r_rpm: %.1f', rpm*direction, \
          rpm*direction)
     left_motor_publisher.publish(rpm*direction)
     right_motor_publisher.publish(rpm*direction)
+    rospy.sleep(time)
+
+    # reset speed, sudden changes crash the sim
+    left_motor_publisher.publish(0.0)
+    right_motor_publisher.publish(0.0)
+    rospy.sleep(0.01)
+
+def turn(rpmR, rpmL, time=3):
+    rospy.loginfo('l_rpm: %.1f r_rpm: %.1f', rpmR, rpmL)
+    left_motor_publisher.publish(rpmL)
+    right_motor_publisher.publish(rpmR)
     rospy.sleep(time)
 
     # reset speed, sudden changes crash the sim
@@ -78,9 +88,9 @@ if __name__ == '__main__':
                 right_motor_publisher.publish(r_rpm)
                 rate.sleep()
             elif benchmark_0:
-                rpm_test_list = [1400, 1500, 1600, 1700, 1800]   
+                rpm_test_list = [1100, 1150, 1200, 1250, 1300, 1350, 1400, 1450, 1500]   
                 for rpm in rpm_test_list:
-                    drive(rpm, 1, 6)
+                    drive(rpm, -1, 3)
                     rate.sleep()
                 rospy.signal_shutdown('benchmark 0 done')
             elif benchmark_1:
@@ -88,7 +98,14 @@ if __name__ == '__main__':
                 drive(1500.0, 1, 8)
                 rotate(1700, 1, 20)
                 drive(1500.0, 1, 8)
-                rospy.signal_shutdown('full benchmark done')
+                rospy.signal_shutdown('benchmark 1 done')
+            elif benchmark_2:
+                rpm_test_list = [1450, 1500, 1800]
+                for rpm in rpm_test_list:
+                    turn(rpm, -1150, 5)
+                    #rotate(rpm, -1, 5)
+                    rate.sleep()
+                rospy.signal_shutdown('benchmark 2 done')
 
     except rospy.ROSInterruptException:
         pass

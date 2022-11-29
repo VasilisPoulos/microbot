@@ -80,7 +80,7 @@
                     filename="package://microrobot/meshes/platform collision mesh v7.stl"/>
             </geometry>
             <surface>
-                <bounce threshold = "1e6"/>
+                <bounce restitution_coefficient="0" threshold="0"/>
             </surface>
         </collision>
     </link>
