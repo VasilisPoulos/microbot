@@ -11,9 +11,10 @@ gazebo_pose_topic = '/gazebo/model_states/pose[3]'
 l_rpm = 1400.0
 r_rpm = -1400.0
 test_mode = 0
-benchmark_0 = 1
+benchmark_0 = 0
 benchmark_1 = 0
 benchmark_2 = 0
+benchmark_3 = 1
 controlled = 0
 
 def robot_pose(msg):
@@ -106,6 +107,12 @@ if __name__ == '__main__':
                     #rotate(rpm, -1, 5)
                     rate.sleep()
                 rospy.signal_shutdown('benchmark 2 done')
+            elif benchmark_3:
+                rpm_test_list = [1150, 1200, 1400, 1450, 1600]
+                for rpm in rpm_test_list:
+                    rotate(rpm, 1, 10)
+                    rate.sleep()
+                rospy.signal_shutdown('benchmark 3 done')
 
     except rospy.ROSInterruptException:
         pass

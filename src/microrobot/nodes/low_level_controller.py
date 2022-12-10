@@ -2,7 +2,6 @@
 
 import rospy
 import math
-import numpy as np
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Float64
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
@@ -12,12 +11,16 @@ right_motor_topic = "/microbot/right_joint_velocity_controller/command"
 odometry_topic = "/visual_odometry"
 motor_L = 0
 motor_R = 0
+x_init = -1
+y_init = -1
+theta_init = -1
+init_set = False
 x_current = 0
 y_current = 0
 theta_current = 0
 
-x_desired = 0.03
-y_desired = 0.03
+x_desired = 0.02
+y_desired = 0.02
 theta_desired_deg = 0 # in deg
 theta_desired = math.radians(theta_desired_deg)
 
@@ -55,18 +58,6 @@ def robot_reached_target(x_desired, y_desired, theta_des, acceptance_range=0.009
        robot_reached_theta(theta_des, theta_current, 0.09):
        return True
     return False
-
-# def smooth_set_range(current_rpm, rpm, step, motor_name):
-#     global motor_R, motor_L
-
-#     rpm_list = np.linspace(current_rpm, rpm, step)
-#     for rpm in rpm_list:
-#         rospy.loginfo("motor: %f", rpm)
-#         # if motor_name == "L":
-#         motor_L = rpm
-#         # else:
-#         #     motor_R = rpm
-#         rospy.sleep(0.001)
         
 def limiter(limit):
     global motor_R, motor_L
@@ -81,100 +72,91 @@ def limiter(limit):
     elif motor_R < - limit:
         motor_R = - limit
 
-def on_site_rotation_to(theta_desired, accuracy=0.09):
+def on_site_rotation_to(theta_desired, accuracy=0.05):
     global motor_R, motor_L
 
     # P controller
-    Kp_orientation = 400
+    Kp_orientation = 600
     theta_error = theta_desired - theta_current
     omega_diff = Kp_orientation * abs((theta_error)) + motor_bias
     
-    if theta_current < theta_desired:
-        motor_L =   omega_diff
-        motor_R = - omega_diff
+    if theta_current > theta_desired:
+
+        motor_L =   - omega_diff
+        motor_R =   - omega_diff
     else:
-        motor_L = - omega_diff
+        motor_L =   omega_diff
         motor_R =   omega_diff
-    
-    limiter(1800)
 
-    rospy.loginfo("rpmL: %f, rpmR: %f, theta_current: %f, omega_diff: %f theta_error: %f", \
-        motor_L, motor_R, math.degrees(theta_current), omega_diff, theta_error)
+    limiter(1450)
 
-    if robot_reached_theta(theta_desired_deg, math.degrees(theta_current), accuracy):
-        # stop_motors()
-        rospy.loginfo('Target reached')
-        # TODO: Following line should be removed.
-        rospy.signal_shutdown('Target reached')
+    if robot_reached_theta(theta_desired, theta_current, accuracy):
+        rospy.loginfo('Target theta reached')
+        #rospy.signal_shutdown('Target reached')
+        return False
+    else:
+        rospy.loginfo("theta_desired: %f, theta_error: %f", math.degrees(theta_desired), \
+            math.degrees(theta_desired - theta_current))
+    return True
 
-def go_to(x_desired, y_desired, theta_desired, accuracy=0.09):
+def set_init_pose():
+    global x_init, y_init, init_set
+    if not init_set:
+        rospy.loginfo('Initialized pose x: %f y: %f theta:%f ', x_current, \
+            y_current, math.degrees(theta_current))
+        x_init = x_current
+        y_init = y_current
+        init_set = True
+
+def reset_init_pose():
+    global x_init, y_init, init_set
+    x_init = -1
+    y_init = -1
+    init_set = False
+
+def dist(p, q):
+    return math.sqrt(sum((px - qx) ** 2.0 for px, qx in zip(p, q)))
+
+def go_to(x_desired, y_desired, theta_desired, accuracy=0.05):
     global motor_R, motor_L
 
-    # P controller
-    Kp_position = 400
-    Kp_orientation = 1000
-    Kp_a = 200
-    Kp_b = 400
-    tmp_motor_L = 0
-    tmp_motor_R = 0
-
-    x_error = x_desired - x_current
-    y_error = y_desired - y_current
-    theta_error = theta_desired - theta_current
-    euclidean_distance_error = math.sqrt(((x_error)**2) + ((y_error)**2)) 
-    alpha = math.atan(y_error/x_error) - theta_current
-    beta = theta_current + alpha - theta_desired
-
-
-    rpm = Kp_position * euclidean_distance_error + 1100
-    rpm_diff = Kp_a * alpha + Kp_b * beta
+    # beta = theta_current + alpha - theta_desired
+    alpha_target = math.atan2(y_desired, x_desired)
+    direction = y_desired - y_current / x_desired - x_current
+    alpha = 1
+    beta = - direction
+    gamma = - y_current - direction * x_current
     
-    if rpm_diff > 0:
-        tmp_motor_R = 1400
-        tmp_motor_L = 1100
-    else:
-        tmp_motor_R = 1100
-        tmp_motor_L = (rpm - rpm_diff)
+    l = alpha*x_current + beta*y_current + gamma \
+        / math.sqrt(alpha**2 + beta**2)
 
-    if 10 > math.degrees(alpha) > -10 and euclidean_distance_error > 0.005:
-        if 10 > math.degrees(alpha): 
-            tmp_motor_R = 1000
-            tmp_motor_L = 1100
-        elif math.degrees(alpha) > 10:
-            tmp_motor_R = 1000
-            tmp_motor_L = 1100
-        else:
-            tmp_motor_R = 1200
-            tmp_motor_L = 1200
+    acceptance_offset = 0.02
+    Kp = 8000
+    
+    if not (on_site_rotation_to(alpha_target)):
+        # rospy.loginfo("l: %f",  l)
+        # diff = Kp*np.abs(l)
+        # if l < 0 and l < - acceptance_offset:
+        #     motor_R = 0
+        #     motor_L = 1300 + diff
+        # elif l > 0 and l > acceptance_offset:
+        #     motor_R = 1300 + diff
+        #     motor_L = 0
+        rospy.loginfo("Moving forward euclidean distance: %f", \
+            dist([x_current, y_current],[x_desired, y_desired]))
+        motor_R = 1400
+        motor_L = - 1400
+        #limiter(1450)
 
-    if tmp_motor_R > 0 and motor_R < 0 or \
-       tmp_motor_R < 0 and motor_R > 0 or \
-       tmp_motor_L > 0 and motor_L < 0 or \
-       tmp_motor_L < 0 and motor_L > 0:
-        # if change in direction of motors
-        stop_motors()
-        # to prevent crashes.
-
-    motor_R = tmp_motor_R
-    motor_L = tmp_motor_L
-
-    limiter(1400)
-    rospy.loginfo("rpmL: %f, rpmR: %f, x_current: %f, y_current: %f theta_current: %f\nrpm_diff: %f euclidean_error: %f a: %f b: %f", \
+def log_info():
+    rospy.loginfo("rpmL: %f, rpmR: %f, x_current: %f, y_current: %f theta_current: %f", \
         motor_L, motor_R, x_current, y_current, 
-        math.degrees(theta_current), rpm_diff, euclidean_distance_error, \
-        math.degrees(alpha), math.degrees(beta))
-
-    if robot_reached_target(x_desired, y_desired, theta_desired_deg):
-        # stop_motors()
-        rospy.loginfo('Target reached')
-        # TODO: Following line should be removed.
-        rospy.signal_shutdown('Target reached')
+        math.degrees(theta_current))
 
 def controller(msg):
-    
     update_pose_and_orientation(msg)
-
-    #on_site_rotation_to(theta_desired)
+    set_init_pose()
+    log_info()
     go_to(x_desired, y_desired, theta_desired)
 
 if __name__ == '__main__':
@@ -189,7 +171,7 @@ if __name__ == '__main__':
         odometry_subscriber = rospy.Subscriber(odometry_topic, Odometry, controller)
         
         while not rospy.is_shutdown():
-            left_motor_publisher.publish(-motor_L)
+            left_motor_publisher.publish(motor_L)
             right_motor_publisher.publish(motor_R)
             rate.sleep()
 
