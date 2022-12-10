@@ -7,7 +7,9 @@ from ar_track_alvar_msgs.msg import AlvarMarkers
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Point, Pose, Quaternion, Twist, Vector3
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
+from geometry_msgs.msg import Pose2D
 odometry_message = Odometry()
+odometry_2d_message = Pose2D()
 
 def alvar_callback(msg): 
     global odometry_message
@@ -45,6 +47,11 @@ def alvar_callback(msg):
     # info above.
     odometry_message.twist.twist = Twist(Vector3(0, 0, 0), Vector3(0, 0, 0))
 
+    # 2D message
+    odometry_2d_message.x = - marker_position.y
+    odometry_2d_message.y = - marker_position.x
+    odometry_2d_message.theta = yaw
+
 if __name__ == '__main__':
     try:
         rospy.init_node("visual_odometry", log_level=rospy.WARN)
@@ -54,9 +61,11 @@ if __name__ == '__main__':
         # TODO: Change node to accept an arg for the robots name
         alvar_marker_sub = rospy.Subscriber("/ar_pose_marker", AlvarMarkers, alvar_callback)
         visual_odometry_pub = rospy.Publisher("/visual_odometry", Odometry, queue_size=1)
+        visual_2d_pub = rospy.Publisher("/visual_odometry_2d", Pose2D, queue_size=1)
 
         while not rospy.is_shutdown():
             visual_odometry_pub.publish(odometry_message)
+            visual_2d_pub.publish(odometry_2d_message)
             rate.sleep()
 
     except rospy.ROSInterruptException:
