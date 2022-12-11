@@ -25,6 +25,7 @@ theta_desired_deg = 0 # in deg
 theta_desired = math.radians(theta_desired_deg)
 
 motor_bias = 1400 # min speed for robot to move
+on_site_bias = 1500
 
 def stop_motors():
     left_motor_publisher.publish(0.0)
@@ -76,19 +77,18 @@ def on_site_rotation_to(theta_desired, accuracy=0.05):
     global motor_R, motor_L
 
     # P controller
-    Kp_orientation = 600
+    Kp_orientation = 700
     theta_error = theta_desired - theta_current
-    omega_diff = Kp_orientation * abs((theta_error)) + motor_bias
+    omega_diff = Kp_orientation * abs((theta_error)) + on_site_bias
     
     if theta_current > theta_desired:
-
         motor_L =   - omega_diff
         motor_R =   - omega_diff
     else:
         motor_L =   omega_diff
         motor_R =   omega_diff
 
-    limiter(1450)
+    limiter(1650)
 
     if robot_reached_theta(theta_desired, theta_current, accuracy):
         rospy.loginfo('Target theta reached')
@@ -117,7 +117,22 @@ def reset_init_pose():
 def dist(p, q):
     return math.sqrt(sum((px - qx) ** 2.0 for px, qx in zip(p, q)))
 
-def go_to(x_desired, y_desired, theta_desired, accuracy=0.05):
+def drive():
+    global motor_L, motor_R
+
+    Kp = 4500
+    drive_bias = 1400
+    euclidean_error =  dist([x_current, y_current],[x_desired, y_desired])
+    motor_speed = Kp*euclidean_error + drive_bias
+    motor_L = - motor_speed
+    motor_R = motor_speed
+    limiter(1800)
+
+    if(euclidean_error < 0.005):
+        rospy.loginfo('Target position reached')
+        rospy.signal_shutdown('Target reached')
+
+def go_to(x_desired, y_desired, theta_desired):
     global motor_R, motor_L
 
     # beta = theta_current + alpha - theta_desired
@@ -132,7 +147,6 @@ def go_to(x_desired, y_desired, theta_desired, accuracy=0.05):
 
     acceptance_offset = 0.02
     Kp = 8000
-    
     if not (on_site_rotation_to(alpha_target)):
         # rospy.loginfo("l: %f",  l)
         # diff = Kp*np.abs(l)
@@ -144,8 +158,7 @@ def go_to(x_desired, y_desired, theta_desired, accuracy=0.05):
         #     motor_L = 0
         rospy.loginfo("Moving forward euclidean distance: %f", \
             dist([x_current, y_current],[x_desired, y_desired]))
-        motor_R = 1400
-        motor_L = - 1400
+        drive()
         #limiter(1450)
 
 def log_info():
