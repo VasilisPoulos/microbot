@@ -13,10 +13,10 @@
     <!-- Platform Friction -->
     <gazebo reference="platform_link">
         <material>Gazebo/Orange</material>
-        <mu1 value="0.4"/>
-        <mu2 value="0.4"/>
-        <maxVel value="0.0"/>
-        <minDepth value="0.0"/>
+        <mu1 value="0.2"/>
+        <mu2 value="0.2"/>
+        <maxVel value="0"/>
+        <minDepth value="0.001"/>
     </gazebo>
 
     <!-- Controller library -->

@@ -11,7 +11,7 @@
         <ode>
           <solver>
             <type>quick</type>
-            <iters>50</iters>
+            <iters>500</iters>
           </solver>
         </ode>
     </physics>
@@ -150,7 +150,7 @@
         <visual name="visual">
           <geometry>
             <cylinder>
-              <radius>0.009</radius>
+              <radius>0.0025</radius>
               <length>0.03</length>
             </cylinder>
           </geometry>

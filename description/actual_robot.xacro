@@ -8,7 +8,7 @@
     <!-- TODO: damping and friction may limit jitter -->
     <xacro:property name="motor_damping" value="0.00000001" />
 
-    <xacro:property name="motor_friction" value="0.0" />
+    <xacro:property name="motor_friction" value="0.00001" />
 
     <xacro:property name="platform_height" value="0.0008" />
 
@@ -79,9 +79,9 @@
                 <mesh scale="0.001 0.001 0.001" 
                     filename="package://microrobot/meshes/platform collision mesh v7.stl"/>
             </geometry>
-            <surface>
+            <!-- <surface>
                 <bounce restitution_coefficient="0" threshold="0"/>
-            </surface>
+            </surface> -->
         </collision>
     </link>
 

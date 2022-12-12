@@ -6,26 +6,42 @@ from nav_msgs.msg import Odometry
 from std_msgs.msg import Float64
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
+# Ros topics
 left_motor_topic = "/microbot/left_joint_velocity_controller/command"
 right_motor_topic = "/microbot/right_joint_velocity_controller/command"
 odometry_topic = "/visual_odometry"
+
+# Initializing microbot parameters
+# Speed per motor
 motor_L = 0
 motor_R = 0
+# Initial position
 x_init = -1
 y_init = -1
 theta_init = -1
 init_set = False
+# Current position
 x_current = 0
 y_current = 0
 theta_current = 0
-
+# Goal
+alpha = 1
+beta = 0
+gamma = 0
+init_alpha_des = True
 x_desired = 0.02
 y_desired = 0.02
+theta_target = 0
 theta_desired_deg = 0 # in deg
 theta_desired = math.radians(theta_desired_deg)
-
+# Biases per type of movement
 motor_bias = 1400 # min speed for robot to move
-on_site_bias = 1500
+# On site
+on_site_bias = 1350
+on_site_limit = 1400
+# Drive forward
+drive_bias = 1350
+drive_limit = 1400
 
 def stop_motors():
     left_motor_publisher.publish(0.0)
@@ -77,7 +93,8 @@ def on_site_rotation_to(theta_desired, accuracy=0.05):
     global motor_R, motor_L
 
     # P controller
-    Kp_orientation = 700
+
+    Kp_orientation = 300
     theta_error = theta_desired - theta_current
     omega_diff = Kp_orientation * abs((theta_error)) + on_site_bias
     
@@ -88,7 +105,7 @@ def on_site_rotation_to(theta_desired, accuracy=0.05):
         motor_L =   omega_diff
         motor_R =   omega_diff
 
-    limiter(1650)
+    limiter(on_site_limit)
 
     if robot_reached_theta(theta_desired, theta_current, accuracy):
         rospy.loginfo('Target theta reached')
@@ -121,45 +138,42 @@ def drive():
     global motor_L, motor_R
 
     Kp = 4500
-    drive_bias = 1400
+
     euclidean_error =  dist([x_current, y_current],[x_desired, y_desired])
     motor_speed = Kp*euclidean_error + drive_bias
     motor_L = - motor_speed
     motor_R = motor_speed
-    limiter(1800)
+    limiter(drive_limit)
 
-    if(euclidean_error < 0.005):
+    if(euclidean_error < 0.0025):
         rospy.loginfo('Target position reached')
         rospy.signal_shutdown('Target reached')
-
+    else:
+        rospy.loginfo("Moving forward euclidean distance: %f", euclidean_error)
+        
 def go_to(x_desired, y_desired, theta_desired):
-    global motor_R, motor_L
+    global motor_R, motor_L, init_alpha_des, alpha, beta, gamma, theta_target
 
     # beta = theta_current + alpha - theta_desired
-    alpha_target = math.atan2(y_desired, x_desired)
-    direction = y_desired - y_current / x_desired - x_current
-    alpha = 1
-    beta = - direction
-    gamma = - y_current - direction * x_current
-    
+    if init_alpha_des:
+        d_x = x_desired - x_current
+        d_y = y_desired - y_current
+        theta_target = math.atan2(d_y, d_x)
+        direction = d_y / d_x
+        beta = - direction
+        gamma = - y_current - direction * x_current
+        init_alpha_des = False
+
     l = alpha*x_current + beta*y_current + gamma \
         / math.sqrt(alpha**2 + beta**2)
 
-    acceptance_offset = 0.02
-    Kp = 8000
-    if not (on_site_rotation_to(alpha_target)):
-        # rospy.loginfo("l: %f",  l)
-        # diff = Kp*np.abs(l)
-        # if l < 0 and l < - acceptance_offset:
-        #     motor_R = 0
-        #     motor_L = 1300 + diff
-        # elif l > 0 and l > acceptance_offset:
-        #     motor_R = 1300 + diff
-        #     motor_L = 0
-        rospy.loginfo("Moving forward euclidean distance: %f", \
-            dist([x_current, y_current],[x_desired, y_desired]))
+    if not (on_site_rotation_to(theta_target)):
+        if abs(l) > 0.003:
+            rospy.loginfo("Recalculating theta l: %f", abs(l))
+            # d_x = x_desired - x_current
+            # d_y = y_desired - y_current
+            # theta_target = math.atan2(d_y, d_x)
         drive()
-        #limiter(1450)
 
 def log_info():
     rospy.loginfo("rpmL: %f, rpmR: %f, x_current: %f, y_current: %f theta_current: %f", \
