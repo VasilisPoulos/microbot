@@ -13,8 +13,8 @@ r_rpm = -1400.0
 test_mode = 0
 benchmark_0 = 0
 benchmark_1 = 0
-benchmark_2_drive = 0
-benchmark_3_on_site = 1
+benchmark_2_drive = 1
+benchmark_3_on_site = 0
 controlled = 0
 
 def robot_pose(msg):
@@ -40,7 +40,7 @@ def drive(rpm, reverse = 1, time = 1):
     r_rpm = rpm*reverse
     rospy.loginfo('l_rpm: %.1f r_rpm: %.1f', l_rpm, r_rpm)
     left_motor_publisher.publish(l_rpm)
-    right_motor_publisher.publish(r_rpm)
+    right_motor_publisher.publish(r_rpm + 50)
     # reset speed, sudden changes crash the sim
     # left_motor_publisher.publish(0.0)
     # right_motor_publisher.publish(0.0)
@@ -101,9 +101,9 @@ if __name__ == '__main__':
                 drive(1500.0, 1, 8)
                 rospy.signal_shutdown('benchmark 1 done')
             elif benchmark_2_drive:
-                rpm_test_list = [1400, 1500, 1800, 1900]
+                rpm_test_list = [1100, 1200, 1300, 1350]
                 for rpm in rpm_test_list:
-                    drive(rpm, 1, 10)
+                    drive(rpm, 1, 7)
                     rate.sleep()
                 rospy.signal_shutdown('benchmark 2 done')
             elif benchmark_3_on_site:

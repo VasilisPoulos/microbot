@@ -40,11 +40,11 @@ theta_error = 0
 # Biases per type of movement
 motor_bias = 1400 # min speed for robot to move
 # On site
-on_site_bias = 1350
-on_site_limit = 1400
+on_site_bias = 1250
+on_site_limit = 1300
 # Drive forward
-drive_bias = 1350
-drive_limit = 1400
+drive_bias = 1250
+drive_limit = 1350
 
 def stop_motors():
     left_motor_publisher.publish(0.0)
@@ -88,7 +88,7 @@ def limiter(limit):
     elif motor_R < - limit:
         motor_R = - limit
 
-def on_site_rotation_to(theta_desired, accuracy=0.05):
+def on_site_rotation_to(theta_desired, accuracy=0.03):
     global motor_R, motor_L
 
     # P controller
@@ -135,15 +135,14 @@ def dist(p, q):
 def drive():
     global motor_L, motor_R
 
-    Kp = 4500
-
-    euclidean_error =  dist([x_current, y_current],[x_desired, y_desired])
+    Kp = 2800
+    #euclidean_error =  dist([x_current, y_current],[x_desired, y_desired])
     motor_speed = Kp*euclidean_error + drive_bias
     motor_L = - motor_speed
     motor_R = motor_speed
     limiter(drive_limit)
 
-    if(euclidean_error < 0.0025):
+    if(euclidean_error < 0.0015):
         rospy.loginfo('Target position reached')
         rospy.signal_shutdown('Target reached')
     else:
@@ -166,7 +165,7 @@ def go_to(x_desired, y_desired, theta_desired):
         / math.sqrt(alpha**2 + beta**2)
 
     if not (on_site_rotation_to(theta_target)):
-        if abs(l) > 0.003 and euclidean_error > 0.04:
+        if abs(l) > 0.003 and euclidean_error > 0.008:
             rospy.loginfo("Recalculating theta l: %f", abs(l))
             d_x = x_desired - x_current
             d_y = y_desired - y_current
