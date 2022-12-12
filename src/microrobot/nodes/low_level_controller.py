@@ -34,6 +34,9 @@ y_desired = 0.02
 theta_target = 0
 theta_desired_deg = 0 # in deg
 theta_desired = math.radians(theta_desired_deg)
+# Error
+euclidean_error = 0
+theta_error = 0
 # Biases per type of movement
 motor_bias = 1400 # min speed for robot to move
 # On site
@@ -63,16 +66,12 @@ def update_pose_and_orientation(msg):
 
     theta_current = yaw
 
+def update_errors():
+    global euclidean_error
+    euclidean_error =  dist([x_current, y_current],[x_desired, y_desired])
+
 def robot_reached_theta(theta_des, theta_current, acceptance_range):
     if theta_des + acceptance_range > theta_current > theta_des - acceptance_range:
-       return True
-    return False
-
-def robot_reached_target(x_desired, y_desired, theta_des, acceptance_range=0.009):
-
-    if x_desired + acceptance_range > x_current > x_desired - acceptance_range and \
-       y_desired + acceptance_range > y_current > y_desired - acceptance_range and \
-       robot_reached_theta(theta_des, theta_current, 0.09):
        return True
     return False
         
@@ -109,7 +108,6 @@ def on_site_rotation_to(theta_desired, accuracy=0.05):
 
     if robot_reached_theta(theta_desired, theta_current, accuracy):
         rospy.loginfo('Target theta reached')
-        #rospy.signal_shutdown('Target reached')
         return False
     else:
         rospy.loginfo("theta_desired: %f, theta_error: %f", math.degrees(theta_desired), \
@@ -168,11 +166,11 @@ def go_to(x_desired, y_desired, theta_desired):
         / math.sqrt(alpha**2 + beta**2)
 
     if not (on_site_rotation_to(theta_target)):
-        if abs(l) > 0.003:
+        if abs(l) > 0.003 and euclidean_error > 0.04:
             rospy.loginfo("Recalculating theta l: %f", abs(l))
-            # d_x = x_desired - x_current
-            # d_y = y_desired - y_current
-            # theta_target = math.atan2(d_y, d_x)
+            d_x = x_desired - x_current
+            d_y = y_desired - y_current
+            theta_target = math.atan2(d_y, d_x)
         drive()
 
 def log_info():
@@ -181,9 +179,13 @@ def log_info():
         math.degrees(theta_current))
 
 def controller(msg):
-    update_pose_and_orientation(msg)
+    # Set once
     set_init_pose()
     log_info()
+
+    # Loop
+    update_errors()
+    update_pose_and_orientation(msg)
     go_to(x_desired, y_desired, theta_desired)
 
 if __name__ == '__main__':
