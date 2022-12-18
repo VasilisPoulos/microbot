@@ -3,13 +3,19 @@
 import rospy
 import math
 from nav_msgs.msg import Odometry
+from visualization_msgs.msg import Marker
 from std_msgs.msg import Float64
 from tf.transformations import euler_from_quaternion
 
 # Ros topics
+# Existing topics
 left_motor_topic = "/microbot/left_joint_velocity_controller/command"
 right_motor_topic = "/microbot/right_joint_velocity_controller/command"
 odometry_topic = "/visual_odometry"
+
+# Creating and publishing Marker
+marker_topic = "/goal_visualization"
+marker = Marker()
 
 # Initializing microbot parameters
 # Speed per motor
@@ -34,8 +40,8 @@ alpha = 1
 beta = 0
 gamma = 0
 equation_is_set = False
-x_desired = 0.02
-y_desired = 0.02
+x_desired = -0.01
+y_desired = -0.01
 theta_desired = 0
 
 # Error
@@ -54,7 +60,7 @@ drive_bias = 1250       # min motor speed for drive forward
 drive_limit = 1300      # max motor speed to reduce bouncing
 drift_limit = 0.003     # maximum distance allowed to drift away from line (l)
 goal_offset = 0.008     # used to stop theta correction when reaching goal
-goal_accuracy = 0.0015  # acceptable distance from desired point
+goal_accuracy = 0.0018  # acceptable distance from desired point
 
 # Utility functions
 def set_init_pose():
@@ -171,6 +177,30 @@ def drive_forward():
     motor_R = rpm
     limiter(drive_limit)
 
+def goal_marker_update():
+    marker.header.frame_id = "odom"
+    marker.header.stamp = rospy.Time.now()
+    # set shape, Arrow: 0; Cube: 1 ; Sphere: 2 ; Cylinder: 3
+    marker.type = 2
+    marker.id = 0
+    # Set the scale of the marker
+    marker.scale.x = 0.005
+    marker.scale.y = 0.005
+    marker.scale.z = 0.005
+    # Set the color
+    marker.color.r = 0.0
+    marker.color.g = 1.0
+    marker.color.b = 0.0
+    marker.color.a = 1.0
+    # Set the pose of the marker
+    marker.pose.position.x = x_desired
+    marker.pose.position.y = y_desired
+    marker.pose.position.z = 0
+    marker.pose.orientation.x = 0.0
+    marker.pose.orientation.y = 0.0
+    marker.pose.orientation.z = 0.0
+    marker.pose.orientation.w = 1.0
+
 def go_to(x_desired, y_desired):
     global motor_R, motor_L, alpha, beta, gamma, theta_desired
 
@@ -206,6 +236,7 @@ def controller(msg):
     set_line_to_desired_position()
 
     # Loop
+    goal_marker_update()
     log_pose()
     update_errors()
     update_pose_and_orientation(msg)
@@ -219,14 +250,16 @@ if __name__ == '__main__':
         rospy.loginfo('Starting.')
         rate = rospy.Rate(10)
         rospy.on_shutdown(stop_motors)
-
+        
         left_motor_publisher = rospy.Publisher(left_motor_topic, Float64, queue_size=1)
         right_motor_publisher = rospy.Publisher(right_motor_topic, Float64, queue_size=1)
         odometry_subscriber = rospy.Subscriber(odometry_topic, Odometry, controller)
-        
+        marker_pub = rospy.Publisher(marker_topic, Marker, queue_size = 2)
+
         while not rospy.is_shutdown():
             left_motor_publisher.publish(motor_L)
             right_motor_publisher.publish(motor_R)
+            marker_pub.publish(marker)
             rate.sleep()
 
     except rospy.ROSInterruptException:
