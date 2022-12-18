@@ -41,7 +41,7 @@ beta = 0
 gamma = 0
 equation_is_set = False
 x_desired = -0.01
-y_desired = -0.01
+y_desired = 0.02   #TODO: fix division by zero error
 theta_desired = 0
 
 # Error

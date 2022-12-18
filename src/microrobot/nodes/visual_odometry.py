@@ -2,17 +2,19 @@
 
 # TODO: rename, visual odometry
 import rospy
-import math
 from ar_track_alvar_msgs.msg import AlvarMarkers
 from nav_msgs.msg import Odometry
+from nav_msgs.msg import Path
+from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import Point, Pose, Quaternion, Twist, Vector3
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from geometry_msgs.msg import Pose2D
 odometry_message = Odometry()
 odometry_2d_message = Pose2D()
+path = Path()
 
 def alvar_callback(msg): 
-    global odometry_message
+    global odometry_message, path
     
     # Constructing odom message
     current_time = rospy.Time.now()
@@ -52,6 +54,24 @@ def alvar_callback(msg):
     odometry_2d_message.y = - marker_position.x
     odometry_2d_message.theta = yaw
 
+    # Path
+    path.header.frame_id = "odom"
+    path.header.stamp = current_time
+
+    pose = PoseStamped()
+    pose.header.frame_id = "odom"
+    pose.header.stamp = current_time
+    pose.pose.position.x = x
+    pose.pose.position.y = y
+    pose.pose.position.z = 0
+    pose.pose.orientation.x = quartenion_x
+    pose.pose.orientation.y = quartenion_y
+    pose.pose.orientation.z = quartenion_z
+    pose.pose.orientation.w = quartenion_w
+    path.poses.append(pose)
+    rospy.loginfo('%s', type(path.poses))
+    path_pub.publish(path)
+
 if __name__ == '__main__':
     try:
         rospy.init_node("visual_odometry", log_level=rospy.WARN)
@@ -62,6 +82,7 @@ if __name__ == '__main__':
         alvar_marker_sub = rospy.Subscriber("/ar_pose_marker", AlvarMarkers, alvar_callback)
         visual_odometry_pub = rospy.Publisher("/visual_odometry", Odometry, queue_size=1)
         visual_2d_pub = rospy.Publisher("/visual_odometry_2d", Pose2D, queue_size=1)
+        path_pub = rospy.Publisher('/path', Path, queue_size=10)
 
         while not rospy.is_shutdown():
             visual_odometry_pub.publish(odometry_message)
