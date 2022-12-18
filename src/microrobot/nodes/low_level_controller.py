@@ -28,7 +28,8 @@ y_current = 0
 theta_current = 0
 
 # Goal
-# Linear equation variables for line that connects current position to desired
+# Linear equation variables for line (l) that connects current position to 
+# desired
 alpha = 1
 beta = 0
 gamma = 0
@@ -43,13 +44,17 @@ theta_error = 0
 
 # Biases per type of movement
 # On site
-Kp_on_site = 300        # P gain for on site rotation
+Kp_on_site = 220        # P gain for on site rotation
 on_site_bias = 1250     # min motor speed for on site rotation
 on_site_limit = 1300    # max motor speed to reduce bouncing
+on_site_accuracy = 0.02 # Acceptance offset in rad 
 # Drive forward
 Kp_drive = 2800         # P gain for drive forward
 drive_bias = 1250       # min motor speed for drive forward
-drive_limit = 1350      # max motor speed to reduce bouncing
+drive_limit = 1300      # max motor speed to reduce bouncing
+drift_limit = 0.003     # maximum distance allowed to drift away from line (l)
+goal_offset = 0.008     # used to stop theta correction when reaching goal
+goal_accuracy = 0.0015  # acceptable distance from desired point
 
 # Utility functions
 def set_init_pose():
@@ -139,9 +144,11 @@ def on_site_rotation_to(theta_desired, accuracy=0.02):
     # P controller
     rpm = Kp_on_site * abs((theta_error)) + on_site_bias
     if theta_current > theta_desired:
+        # Turn right
         motor_L =   - rpm
         motor_R =   - rpm
     else:
+        # Turn left
         motor_L =   rpm
         motor_R =   rpm
 
@@ -165,24 +172,33 @@ def drive_forward():
     limiter(drive_limit)
 
 def go_to(x_desired, y_desired):
-    global motor_R, motor_L, init_alpha_des, alpha, beta, gamma, theta_desired
+    global motor_R, motor_L, alpha, beta, gamma, theta_desired
 
-    l = alpha*x_current + beta*y_current + gamma \
-        / math.sqrt(alpha**2 + beta**2)
+    # Calculate distance from line (l) to catch the robot drifting away
+    distance_from_line = \
+        alpha*x_current + beta*y_current + gamma / math.sqrt(alpha**2 + beta**2)
 
-    if not (on_site_rotation_to(theta_desired)):
-        if abs(l) > 0.003 and euclidean_error > 0.006:
-            rospy.loginfo("Recalculating theta l: %f", abs(l))
+    # First rotate to point
+    if not (on_site_rotation_to(theta_desired, accuracy=on_site_accuracy)):
+        # then drive to desired position, fix theta_error on the way
+        drive_forward()
+        # If robot drifts away form l, recalculate theta desired to correct 
+        # it's direction. If it's too close to the desired point, skip the
+        # correction.
+        if abs(distance_from_line) > drift_limit \
+        and euclidean_error > goal_offset:
+            rospy.loginfo("Recalculating theta l: %f", abs(distance_from_line))
             d_x = x_desired - x_current
             d_y = y_desired - y_current
             theta_desired = math.atan2(d_y, d_x)
-        drive_forward()
 
-        if(euclidean_error < 0.0015):
+        if(euclidean_error < goal_accuracy):
             rospy.loginfo('Target position reached')
             rospy.signal_shutdown('Target reached')
+            # TODO: get next point
         else:
-            rospy.loginfo("Moving forward euclidean distance: %f", euclidean_error)
+            rospy.loginfo("Moving forward, euclidean distance: %f", \
+                euclidean_error)
 
 def controller(msg):
     # Set once per point on trajectory
