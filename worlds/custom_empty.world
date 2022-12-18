@@ -7,7 +7,7 @@
         <max_step_size>0.0001</max_step_size>
         <real_time_factor>1</real_time_factor>
         <!-- rt update 0 = run gazebo as fast as possible -->
-        <real_time_update_rate>10000</real_time_update_rate>
+        <real_time_update_rate>0</real_time_update_rate>
         <ode>
           <solver>
             <type>quick</type>
@@ -76,8 +76,8 @@
           <camera name="head">
               <horizontal_fov>1.078</horizontal_fov>
               <image>
-                <width>1920</width>
-                <height>1080</height>
+                <width>1280</width>
+                <height>720</height>
                 <format>R8G8B8</format>
               </image>
               <clip>
