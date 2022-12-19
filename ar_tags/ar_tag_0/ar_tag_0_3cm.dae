@@ -12,7 +12,7 @@
   </asset>
   <library_images>
     <image id="MarkerData_0_3cm_png" name="MarkerData_0_3cm_png">
-      <init_from>images/MarkerData_0_3cm.png</init_from>
+      <init_from>MarkerData_0_3cm.png</init_from>
     </image>
   </library_images>
   <library_effects>

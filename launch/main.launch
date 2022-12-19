@@ -1,3 +1,4 @@
+<!-- Unfinished launchfile for multiple robots, not used in current version -->
 <launch>
     <!-- Launch gazebo with custom world -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
