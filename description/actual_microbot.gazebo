@@ -18,6 +18,7 @@
         <maxVel value="0"/>
         <minDepth value="0.001"/>
         <kd value="100"/> <!--  value of 100 is like dropping a block of wood on the ground -->
+        <!-- <max_contacts>3</max_contacts> -->
     </gazebo>
 
     <!-- Controller library -->

@@ -1,0 +1,93 @@
+<?xml version='1.0'?>
+<sdf version='1.7'>
+  <model name='table_marble'>
+    <static>1</static>
+    <allow_auto_disable>0</allow_auto_disable>
+    <link name='link'>
+      
+      <inertial>
+        <mass>1</mass>
+        <pose>0 0 0 0 -0 0</pose>
+        <inertia>
+          <ixx>1</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1</iyy>
+          <iyz>0</iyz>
+          <izz>1</izz>
+        </inertia>
+      </inertial>
+
+      <visual name='visual'>
+        <geometry>
+          <mesh>
+            <!-- TODO: CHANGE TO RELATIVE TO THE PACKAGE PATHS -->
+            <uri>model://table_marble/meshes/table_lightmap.dae</uri>
+            <scale>0.25 0.25 0.25</scale>
+          </mesh>
+        </geometry>
+
+        <material>
+          <script>
+            <uri>model://table_marble/materials/scripts</uri>
+            <uri>model://table_marble/materials/textures</uri>
+            <name>Table/Marble_Lightmap</name>
+          </script>
+          <lighting>0</lighting>
+          <shader type='pixel'>
+            <normal_map>__default__</normal_map>
+          </shader>
+        </material>
+
+        <cast_shadows>1</cast_shadows>
+      </visual>
+
+      <collision name='collision'>
+        <max_contacts>10</max_contacts>
+        <geometry>
+          <mesh>
+            <uri>/home/vasilisp/.gazebo/models/table_marble/meshes/table_lightmap.dae</uri>
+            <scale>0.25 0.25 0.25</scale>
+          </mesh>
+        </geometry>
+
+        <surface>
+          <friction>
+            <ode>
+              <mu>0.4</mu>
+              <mu2>0.4</mu2>
+            </ode>
+            <torsional>
+              <coefficient>1</coefficient>
+              <patch_radius>0</patch_radius>
+              <surface_radius>0</surface_radius>
+              <use_patch_radius>1</use_patch_radius>
+              <ode>
+                <slip>0</slip>
+              </ode>
+            </torsional>
+          </friction>
+
+          <bounce>
+            <restitution_coefficient>0</restitution_coefficient>
+            <threshold>1e+10</threshold>
+          </bounce>
+      
+          <contact>
+            <collide_without_contact>0</collide_without_contact>
+            <collide_without_contact_bitmask>1</collide_without_contact_bitmask>
+            <collide_bitmask>1</collide_bitmask>
+            <ode>
+              <soft_cfm>0</soft_cfm>
+              <soft_erp>0.2</soft_erp>
+              <kp>1e+13</kp>
+              <kd>1000</kd>
+              <max_vel>0</max_vel>
+              <min_depth>0</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+    </link>
+  </model>
+</sdf>

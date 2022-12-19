@@ -74,10 +74,13 @@
   <exec_depend>rqt_gui</exec_depend>
   <exec_depend>urdf</exec_depend>
 
+  <exec_depend>gazebo_ros</exec_depend>
+
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->
+    <!-- @https://answers.gazebosim.org//question/6568/uri-paths-to-packages-in-the-sdf-model-file/ -->
     <gazebo_ros                                                                 
-        gazebo_model_path="${prefix}/meshes" /> 
+        gazebo_model_path="${prefix}/.." /> 
   </export>
 </package>
