@@ -36,12 +36,19 @@ theta_current = 0
 # Goal
 # Linear equation variables for line (l) that connects current position to 
 # desired
+point1 = [0.02, -0.03]
+point2 = [0.02, 0.01]
+point3 = [-0.01, 0.01]
+point4 = [-0.03, -0.04]
+points_list = [point1, point2, point3, point4]
+num_of_point = 0
+
 alpha = 1
 beta = 0
 gamma = 0
 equation_is_set = False
-x_desired = 0.02
-y_desired = -0.03   #TODO: fix division by zero error
+x_desired = point1[0]
+y_desired = point1[1]   #TODO: fix division by zero error
 theta_desired = 0
 
 # Error
@@ -201,8 +208,8 @@ def goal_marker_update():
     marker.pose.orientation.z = 0.0
     marker.pose.orientation.w = 1.0
 
-def go_to(x_desired, y_desired):
-    global motor_R, motor_L, alpha, beta, gamma, theta_desired
+def go_to():
+    global motor_R, motor_L, alpha, beta, gamma, theta_desired, x_desired, y_desired, num_of_point
 
     # Calculate distance from line (l) to catch the robot drifting away
     distance_from_line = \
@@ -224,7 +231,11 @@ def go_to(x_desired, y_desired):
 
         if(euclidean_error < goal_accuracy):
             rospy.loginfo('Target position reached')
-            rospy.signal_shutdown('Target reached')
+            x_desired = points_list[num_of_point][0]
+            y_desired = points_list[num_of_point][1]
+            num_of_point += 1
+            if num_of_point == len(points_list):
+                rospy.signal_shutdown('Target reached')
             # TODO: get next point
         else:
             rospy.loginfo("Moving forward, euclidean distance: %f", \
@@ -240,7 +251,7 @@ def controller(msg):
     log_pose()
     update_errors()
     update_pose_and_orientation(msg)
-    go_to(x_desired, y_desired)
+    go_to()
 
     # TODO: Reset and pick next point 
 

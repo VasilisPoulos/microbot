@@ -17,7 +17,7 @@ _LINE_INTERVAL = 3 # Number of point in linear parts.
                     # Bypassed if _BYPASS_INTERNAL_INTERVALS is True.
 _CLOTHOID_INTERVAL = 14 # Number of points in a clothoid arc.
 _WHEELS_AXIS = 0.178
-_STEP_MULDULATION = 100. # Used to modulate the number of points in the linear parts of the trajectory, 
+_STEP_MODULATION = 100. # Used to modulate the number of points in the linear parts of the trajectory, 
                        # affects performance. High number means less points.
 _FINAL_DISPLAY = 1
 
@@ -78,7 +78,7 @@ class Clothoid:
             self.direction = self.clothoid_direction 
 
     def move_trajectory_to_x_axis(self):
-        """ Moves the start, intersection and finsih points of a trajectory to the 
+        """ Moves the start, intersection and finish points of a trajectory to the 
         
         Move starting point to [0, 0] then rotate the trajectory until the intersection point is
         also on x-axis."""
@@ -194,7 +194,7 @@ class Clothoid:
         return x0 
 
     def calculate_clothoid_curve(self):
-        """ Calculates a clotoid curve and the direction the robot should follow in this curve. """
+        """ Calculates a clothoid curve and the direction the robot should follow in this curve. """
         global _LINE_INTERVAL, _WHEELS_AXIS
         clothoid_internal_interval = 30
 
@@ -227,7 +227,7 @@ class Clothoid:
             symmetrical_path.append([symmetrical_point[0], \
                 symmetrical_point[1]])
 
-        # Calculcating the direction to the corresponding symmetrical points.
+        # Calculating the direction to the corresponding symmetrical points.
         symmetrical_directions = []
         for direction_item in np.linspace(direction[-1], np.degrees(np.pi - self.turn_angle), \
             math.floor(len(direction))):
@@ -239,7 +239,7 @@ class Clothoid:
         
         if len(self.clothoid_curve) >= 2 and not _BYPASS_INTERNAL_INTERVALS:
             step = distance.euclidean(self.clothoid_curve[0], \
-                self.clothoid_curve[1]) * _STEP_MULDULATION
+                self.clothoid_curve[1]) * _STEP_MODULATION
         else:
             step = _LINE_INTERVAL
 
@@ -403,19 +403,19 @@ def clothoid_trajectory(points_list):
     return final_trajectory, final_direction
     
 def main():
-    # trajecory_points = [np.array([0., 0., 0.]), 
+    # trajectory_points = [np.array([0., 0., 0.]), 
     #                     np.array([-5., -6., 1.]),
     #                     np.array([-7., -15., 1.])]
 
-    # _, _ = clothoid_trajectory(trajecory_points) # TODO: break into two functions (calculate - plot)
+    # _, _ = clothoid_trajectory(trajectory_points) # TODO: break into two functions (calculate - plot)
 
-    # c1 = Clothoid(trajecory_points[1], trajecory_points[2], trajecory_points[3])
+    # c1 = Clothoid(trajectory_points[1], trajectory_points[2], trajectory_points[3])
     # # print(c1)
     # c1.plot()
-    # # c2 = Clothoid(trajecory_points[2], trajecory_points[3], trajecory_points[4])
+    # # c2 = Clothoid(trajectory_points[2], trajectory_points[3], trajectory_points[4])
     # # print(c2)
     # # c2.plot()
-    # # c3 = Clothoid(trajecory_points[4], trajecory_points[5], trajecory_points[6])
+    # # c3 = Clothoid(trajectory_points[4], trajectory_points[5], trajectory_points[6])
     # # print(c3)
     # # c3.plot()
 

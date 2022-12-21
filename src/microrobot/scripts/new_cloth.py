@@ -286,10 +286,10 @@ class Clothoid:
 
 def test_main():
     s1 = np.array([0., 0., 1])
-    p = np.array([1., 0., 1.])
-    s2 = np.array([0., 1., 1.])
+    p = np.array([0.02, 0., 1.])
+    s2 = np.array([0.03, 0.03, 1.])
     # TODO: catch 180 deg case in a function that handles the user input.
-    c1 = Clothoid(s1, p, s2, max_dev=0.1, num_of_points=10)
+    c1 = Clothoid(s1, p, s2, max_dev=0.01, num_of_points=100)
     print(c1.path)
     print(np.degrees(c1.angle))
     c1.plot()
