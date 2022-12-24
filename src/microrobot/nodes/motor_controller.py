@@ -59,7 +59,7 @@ theta_error = 0
 # On site
 Kp_on_site = 220        # P gain for on site rotation
 on_site_bias = 1250     # min motor speed for on site rotation
-on_site_limit = 1300    # max motor speed to reduce bouncing
+on_site_limit = 1280    # max motor speed to reduce bouncing
 on_site_accuracy = 0.02 # Acceptance offset in rad 
 # Drive forward
 Kp_drive = 2800         # P gain for drive forward
@@ -156,22 +156,49 @@ def on_site_rotation_to(theta_desired, accuracy=0.02):
 
     # P controller
     rpm = Kp_on_site * abs((theta_error)) + on_site_bias
-    if theta_current > theta_desired:
-        # Turn right
-        motor_L =   - rpm
-        motor_R =   - rpm
+    # if theta_current > theta_desired:
+    #     # Turn right
+    #     motor_L =   - rpm
+    #     motor_R =   - rpm
+    # else:
+    #     # Turn left
+    #     motor_L =   rpm
+    #     motor_R =   rpm
+    
+    if theta_current > 0 and theta_desired < 0 \
+        or theta_current < 0 and theta_desired > 0:
+
+        dist_towards_0 = abs(theta_current) + abs(theta_desired)
+
+        dist_form_180_current = -(theta_current/theta_current)*180 + theta_current
+        dist_form_180_desired = -(theta_desired/theta_desired)*180 + theta_desired
+        dist_towards_180 = abs(dist_form_180_desired) + abs(dist_form_180_current)
+
+        sign = (theta_desired/theta_desired)
+        if dist_towards_0 < dist_towards_180:
+            motor_L =   sign*rpm
+            motor_R =   sign*rpm
+        else:
+            motor_L =   -sign*rpm
+            motor_R =   -sign*rpm
     else:
-        # Turn left
-        motor_L =   rpm
-        motor_R =   rpm
+        if theta_current > theta_desired:
+            # Turn right
+            motor_L =   - rpm
+            motor_R =   - rpm
+        else:
+            # Turn left
+            motor_L =   rpm
+            motor_R =   rpm
+    
 
     limiter(on_site_limit)
 
     if robot_reached_theta(theta_desired, theta_current, accuracy):
-        rospy.loginfo('Target theta reached')
+        #rospy.loginfo('Target theta reached')
         return False
     else:
-        rospy.loginfo("theta_desired: %f, theta_error: %f", \
+        rospy.loginfo("Turning, theta_desired: %f, theta_error: %f", \
             math.degrees(theta_desired), math.degrees(theta_error))
     return True
 
@@ -224,7 +251,7 @@ def go_to():
         # correction.
         if abs(distance_from_line) > drift_limit \
         and euclidean_error > goal_offset:
-            rospy.loginfo("Recalculating theta l: %f", abs(distance_from_line))
+            rospy.loginfo("[WARNING] Recalculating theta l: %f", abs(distance_from_line))
             d_x = x_desired - x_current
             d_y = y_desired - y_current
             theta_desired = math.atan2(d_y, d_x)
@@ -234,6 +261,8 @@ def go_to():
             x_desired = points_list[num_of_point][0]
             y_desired = points_list[num_of_point][1]
             num_of_point += 1
+            reset_init_pose()
+            set_init_pose()
             if num_of_point == len(points_list):
                 rospy.signal_shutdown('Target reached')
             # TODO: get next point
