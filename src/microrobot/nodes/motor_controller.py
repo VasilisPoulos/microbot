@@ -7,6 +7,12 @@ from visualization_msgs.msg import Marker
 from std_msgs.msg import Float64
 from tf.transformations import euler_from_quaternion
 
+import sys
+sys.path.insert(1, '/home/vasilisp/catkin_ws/src/microrobot/src/microrobot/scripts/')
+
+import numpy as np
+import new_cloth 
+
 # Ros topics
 # Existing topics
 left_motor_topic = "/microbot/left_joint_velocity_controller/command"
@@ -41,14 +47,22 @@ point2 = [0.02, 0.01]
 point3 = [-0.01, 0.01]
 point4 = [-0.03, -0.04]
 points_list = [point1, point2, point3, point4]
+
+s1 = np.array([0., 0., 1])
+p = np.array([0.05, 0., 1.])
+s2 = np.array([0.025, 0.05, 1.])
+# TODO: catch 180 deg case in a function that handles the user input.
+c1 = new_cloth.Clothoid(s1, p, s2, max_dev=0.002, num_of_points=3)
+clothoids = c1.path 
+already_outside = False
 num_of_point = 0
 
 alpha = 1
 beta = 0
 gamma = 0
 equation_is_set = False
-x_desired = point1[0]
-y_desired = point1[1]   #TODO: fix division by zero error
+x_desired = clothoids[0][0]
+y_desired = clothoids[0][1]   #TODO: fix division by zero error
 theta_desired = 0
 
 # Error
@@ -58,15 +72,15 @@ theta_error = 0
 # Biases per type of movement
 # On site
 Kp_on_site = 200        # P gain for on site rotation
-on_site_bias = 1250     # min motor speed for on site rotation
-on_site_limit = 1280    # max motor speed to reduce bouncing
+on_site_bias = 1300     # min motor speed for on site rotation
+on_site_limit = 1350    # max motor speed to reduce bouncing
 on_site_accuracy = 0.02 # Acceptance offset in rad 
 # Drive forward
 Kp_drive = 2800         # P gain for drive forward
 drive_bias = 1200       # min motor speed for drive forward
 drive_limit = 1250      # max motor speed to reduce bouncing
 drift_limit = 0.003     # maximum distance allowed to drift away from line (l)
-goal_offset = 0.008     # used to stop theta correction when reaching goal
+goal_offset = 0.01      # used to stop theta correction when reaching goal
 goal_accuracy = 0.0018  # acceptable distance from desired point
 
 # Utility functions
@@ -187,34 +201,39 @@ def on_site_rotation_to(theta_desired, accuracy=0.02):
         # think that the robot needs to make a full right hand rotation to -pi, even 
         # though the left hand path is shorter.
 
-        if theta_current >= 0:
-            opposite_to_th_current = -math.pi + theta_current
-            if opposite_to_th_current >= theta_desired >= - math.pi \
-                or math.pi > theta_desired > theta_current:           
-                # Theta desired is to the left of theta_current
-                rospy.loginfo('Turning LEFT to %.2f [%.2f, %.2f]', 
-                    math.degrees(theta_desired), opposite_to_th_current, theta_current)
-                turn_left(rpm)
-            elif theta_current > theta_desired >= 0 \
-                or 0 > theta_desired > opposite_to_th_current:
-                # Theta desired is to the right of theta_current
-                rospy.loginfo('Turning RIGHT to %.2f [%.2f, %.2f]', 
-                    math.degrees(theta_desired), opposite_to_th_current, theta_current)
-                turn_right(rpm)
-        elif theta_current < 0:
-            opposite_to_th_current = math.pi + theta_current
-            if theta_current > theta_desired > - math.pi \
-                or math.pi >= theta_desired >= opposite_to_th_current:           
-                # Theta desired is to the right of theta_current
-                rospy.loginfo('Turning RIGHT to %.2f [%.2f, %.2f]', 
-                    math.degrees(theta_desired), opposite_to_th_current, theta_current)
-                turn_right(rpm)
-            elif 0 <= theta_desired < opposite_to_th_current \
-                or 0 > theta_desired > theta_current:
-                # Theta desired is to the left of theta_current
-                rospy.loginfo('Turning LEFT to %.2f [%.2f, %.2f]', 
-                    math.degrees(theta_desired), opposite_to_th_current, theta_current)
-                turn_left(rpm)
+        # if theta_current >= 0:
+        #     opposite_to_th_current = -math.pi + theta_current
+        #     if opposite_to_th_current >= theta_desired >= - math.pi \
+        #         or math.pi > theta_desired > theta_current:           
+        #         # Theta desired is to the left of theta_current
+        #         rospy.loginfo('Turning LEFT to %.2f [%.2f, %.2f]', 
+        #             math.degrees(theta_desired), opposite_to_th_current, theta_current)
+        #         turn_left(rpm)
+        #     elif theta_current > theta_desired >= 0 \
+        #         or 0 > theta_desired > opposite_to_th_current:
+        #         # Theta desired is to the right of theta_current
+        #         rospy.loginfo('Turning RIGHT to %.2f [%.2f, %.2f]', 
+        #             math.degrees(theta_desired), opposite_to_th_current, theta_current)
+        #         turn_right(rpm)
+        # elif theta_current < 0:
+        #     opposite_to_th_current = math.pi + theta_current
+        #     if theta_current > theta_desired > - math.pi \
+        #         or math.pi >= theta_desired >= opposite_to_th_current:           
+        #         # Theta desired is to the right of theta_current
+        #         rospy.loginfo('Turning RIGHT to %.2f [%.2f, %.2f]', 
+        #             math.degrees(theta_desired), opposite_to_th_current, theta_current)
+        #         turn_right(rpm)
+        #     elif 0 <= theta_desired < opposite_to_th_current \
+        #         or 0 > theta_desired > theta_current:
+        #         # Theta desired is to the left of theta_current
+        #         rospy.loginfo('Turning LEFT to %.2f [%.2f, %.2f]', 
+        #             math.degrees(theta_desired), opposite_to_th_current, theta_current)
+        #         turn_left(rpm)
+
+        if theta_current > theta_desired:
+            turn_right(rpm)
+        else:
+            turn_left(rpm)
 
         limiter(on_site_limit)
 
@@ -246,8 +265,8 @@ def goal_marker_update():
     marker.pose.orientation.w = 1.0
 
 def go_to():
-    global motor_R, motor_L, alpha, beta, gamma, theta_desired, x_desired, y_desired, num_of_point
-
+    global motor_R, motor_L, alpha, beta, gamma, theta_desired, x_desired, y_desired, num_of_point, \
+    equation_is_set, already_outside
     # Calculate distance from line (l) to catch the robot drifting away
     distance_from_line = \
         alpha*x_current + beta*y_current + gamma / math.sqrt(alpha**2 + beta**2)
@@ -260,23 +279,25 @@ def go_to():
         # it's direction. If it's too close to the desired point, skip the
         # correction.
         if abs(distance_from_line) > drift_limit \
-        and euclidean_error > goal_offset:
+        and euclidean_error > goal_offset and not already_outside:
             rospy.loginfo("[WARNING] Recalculating theta l: %f", abs(distance_from_line))
             d_x = x_desired - x_current
             d_y = y_desired - y_current
             theta_desired = math.atan2(d_y, d_x)
+            already_outside = True 
+        elif abs(distance_from_line) < drift_limit:
+            already_outside = False
 
         if(euclidean_error < goal_accuracy):
             rospy.loginfo('Target position reached')
-            x_desired = points_list[num_of_point][0]
-            y_desired = points_list[num_of_point][1]
+            x_desired = clothoids[num_of_point][0]
+            y_desired = clothoids[num_of_point][1]
             num_of_point += 1
             reset_init_pose()
             set_init_pose()
             equation_is_set = False
-            if num_of_point == len(points_list):
+            if num_of_point == len(clothoids):
                 rospy.signal_shutdown('Target reached')
-            # TODO: get next point
         else:
             rospy.loginfo("Moving forward, euclidean distance: %f", \
                 euclidean_error)
@@ -292,8 +313,6 @@ def controller(msg):
     update_errors()
     update_pose_and_orientation(msg)
     go_to()
-
-    # TODO: Reset and pick next point 
 
 if __name__ == '__main__':
     try: 

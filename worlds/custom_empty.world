@@ -13,6 +13,10 @@
             <type>quick</type>
             <iters>100</iters>
           </solver>
+          <!-- <constraints>
+            <contact_max_correcting_vel>0</contact_max_correcting_vel>
+            <contact_surface_layer>0</contact_surface_layer>
+          </constraints> -->
         </ode>
     </physics>
 
@@ -116,53 +120,3 @@
 
   </world>
 </sdf>
-
-<!--     <model name="Custom Table">
-      <static>true</static>
-      <pose>0 0 0.48</pose>
-      <link name="table_link"> 
-        <visual name="table_visual">
-          <geometry>
-            <box>
-              <size>1 1 0.96</size>
-            </box>
-          </geometry>
-          <material>
-            <script>
-              <uri>file://media/materials/scripts/gazebo.material</uri>
-              <name>Gazebo/Grey</name>
-            </script>
-          </material>
-        </visual>
-
-        <collision name="table_collision">
-          <max_contacts>3</max_contacts>
-          <geometry>
-            <box>
-              <size>1 1 0.96</size>
-            </box>
-          </geometry>
-
-          <surface>
-            <bounce>
-              <restitution_coefficient>0</restitution_coefficient>
-              <threshold>1e+10</threshold>
-            </bounce>
-            <friction>
-              <ode>
-                <mu>0.2</mu>
-                <mu2>0.2</mu2>
-              </ode>
-            </friction>
-            <contact>
-              <ode>
-                <!-- <kp>1e+</kp> -->
-                <kd>1000</kd>
-                <max_vel>0</max_vel>
-                <min_depth>0</min_depth>
-              </ode>
-            </contact>
-          </surface>
-        </collision>
-      </link>
-    </model> -->

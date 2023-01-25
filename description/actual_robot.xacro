@@ -5,7 +5,6 @@
     <xacro:include filename="actual_microbot.gazebo" />
 
     <!-- Robot Constants -->
-    <!-- TODO: damping and friction may limit jitter -->
     <xacro:property name="motor_damping" value="0.00000001" />
 
     <xacro:property name="motor_friction" value="0.00001" />
@@ -209,7 +208,7 @@
     <joint name="ar_tag_joint" type="fixed">
         <axis xyz="1 0 0"/>      
         <origin xyz="0 0 0.014" rpy="0 0 1.57"/>
-        <parent link="base_link"/>
+        <parent link="platform_link"/>
         <child link="ar_tag_link"/>
     </joint>
 

@@ -1,0 +1,20 @@
+digraph G {
+node [shape=box];
+"base_link" [label="base_link"];
+"platform_link" [label="platform_link"];
+"ar_tag_link" [label="ar_tag_link"];
+"imu_link" [label="imu_link"];
+"left_eccenter_link" [label="left_eccenter_link"];
+"right_eccenter_link" [label="right_eccenter_link"];
+node [shape=ellipse, color=blue, fontcolor=blue];
+"base_link" -> "platform_joint" [label="xyz: 0 0 0 \nrpy: 0 -0 0"]
+"platform_joint" -> "platform_link"
+"platform_link" -> "ar_tag_joint" [label="xyz: 0 0 0.014 \nrpy: 0 -0 1.57"]
+"ar_tag_joint" -> "ar_tag_link"
+"platform_link" -> "imu_joint" [label="xyz: 0 0 0.0013 \nrpy: 0 -0 0"]
+"imu_joint" -> "imu_link"
+"platform_link" -> "platform_to_left_eccenter_joint" [label="xyz: 0 0.022 0.003 \nrpy: 0 -0 0"]
+"platform_to_left_eccenter_joint" -> "left_eccenter_link"
+"platform_link" -> "platform_to_right_eccenter_joint" [label="xyz: 0 -0.022 0.003 \nrpy: 0 0 -3.14"]
+"platform_to_right_eccenter_joint" -> "right_eccenter_link"
+}

@@ -6,6 +6,56 @@ import scipy.special as sc
 import matplotlib.pyplot as plt
 from clothoids_math import *
 
+def calculate_trajectory(intersection, finish, view=True):
+    '''
+    Transform start, intersection (p) and finish to x-axis using affine transformations so that 
+    the problem can be solved using the paper's theory.    
+    '''
+
+    # 1.1 Rotation
+    start = np.array([0., 0., 1])
+    angle_p = \
+        - get_angle_between_points(start[0], start[1], intersection[0], intersection[1])
+
+    print('Angle: {}'.format(np.degrees(angle_p)))
+
+    temp_p = [affine_rotation(angle_p, intersection)[:-2][0], 0., 1.]
+    temp_finish = affine_rotation(angle_p, finish)
+    
+    # 1.2 Reflection 
+    reflected = False
+    if temp_finish[1] < 0:
+        temp_finish = affine_reflection(temp_finish)
+        reflected = True
+
+    # Sanity check, see if point p is on x-axis.
+    print('Transformed Point P: {}'.format(temp_p))
+    print('Transformed Point F: {}'.format(temp_finish))
+
+    # 2. Calculate temp clothoid curve
+    c1 = Clothoid(start, temp_p, temp_finish, max_dev=0.003)
+    # c1.plot()
+
+    # 3. Transform path back and plot
+    if reflected:
+        c1.path = [affine_reflection(point) for point in c1.path]
+        c1.control_point = affine_reflection(c1.control_point)  
+        c1.intersection = affine_reflection(c1.intersection) 
+        c1.finish = affine_reflection(c1.finish)
+        c1.curve_start = affine_reflection(c1.curve_start) 
+
+    actual_path = [affine_rotation(-angle_p, point) for point in c1.path]
+    c1.control_point = affine_rotation(-angle_p, c1.control_point)  
+    c1.intersection = affine_rotation(-angle_p, c1.intersection) 
+    c1.finish = affine_rotation(-angle_p, c1.finish)
+    c1.curve_start = affine_rotation(-angle_p, c1.curve_start) 
+
+    c1.path = actual_path
+    c1.intersection
+
+    if view:
+        c1.plot()
+
 class Clothoid:
     """ Calculates right hand turn path and direction for a trajectory that 
     contains a clothoid curve.
@@ -20,14 +70,14 @@ class Clothoid:
     """
 
     def __init__(self, start, intersection, finish, max_dev=0.1, \
-        wheel_axis=0.1, num_of_points=10, reduce_step=0.0) -> None:
+        wheel_axis=0.025) -> None:
         self.start = start
         self.intersection = intersection
         self.finish = finish
         self.max_dev = max_dev
         self.wheel_axis = wheel_axis
-        self.num_of_points = num_of_points
-        self.reduce_step = 1 - reduce_step 
+        self.points_on_curve = 6
+        self.points_on_straights = 4
         self.vector_length = self.__calculate_vector_length()
         self.angle = self.__calculate_angle()
         self.characterizing_shape = self.__calculate_characterizing_shape()
@@ -37,17 +87,11 @@ class Clothoid:
 
     def __calculate_vector_length(self) -> float:
         vector_a = self.start - self.intersection
-        # vector_b = self.finish - self.intersection
-
         vector_a_length = np.linalg.norm(vector_a)
-        # vector_b_length = np.linalg.norm(vector_b)
-        # if vector_a_length != vector_b_length:
-        #   print('Unequal vectors')     
-        
+
         return vector_a_length
 
     def __calculate_angle(self) -> float:     
-        # more clothoid related computations here #
         return angle_between_lines(self.start, self.intersection, self.finish)
 
     def __calculate_characterizing_shape(self) -> float:
@@ -66,7 +110,8 @@ class Clothoid:
             self.max_dev = -(self.start[0] - self.vector_length)/ ((1 / np.tan(self.angle / 2)) \
             + (CF / SF))
             x0 = self.start[0]
-            print('[Warning self.max_dev] set to {}'.format(self.max_dev))
+            print('Warning: clothoid starts before starting position,' + \
+                'reducing self.max_dev set to {}'.format(self.max_dev))
             self.characterizing_shape = self.__calculate_characterizing_shape()
 
         return [x0, 0]
@@ -79,60 +124,38 @@ class Clothoid:
         return np.array([x_c , y_c]) 
 
     def __calculate_curve_to_point_c(self) -> tuple[list, list]:
-    # TODO: solve equation to find the right t.
         curve_path = []
         direction = np.array([])
-        for t in np.linspace(0, euler_distance(self.start[0], self.control_point[0]), self.num_of_points/2):
-            SF, CF  = sc.fresnel(np.sqrt((2 * self.angle) / (self.wheel_axis * \
-                np.pi)) * t) 
-            x = np.sqrt(np.pi/self.characterizing_shape) * CF
-            y = np.sqrt(np.pi/self.characterizing_shape) * SF
-            theta = (self.angle / self.wheel_axis) * (t**2)
+        theta_c = (np.pi - self.angle) / 2
+     
+        for theta in np.linspace(0, theta_c, self.points_on_curve):
+            fresnel_variable = np.sqrt(2*theta/ np.pi)
+            SF, CF  = sc.fresnel(fresnel_variable) 
 
-            if(x > self.control_point[0] or y > self.control_point[1]): break
-
+            x = round(np.sqrt(np.pi/self.characterizing_shape) * CF, 6)
+            y = round(np.sqrt(np.pi/self.characterizing_shape) * SF, 6)
             curve_path.append([self.curve_start[0] + x, self.curve_start[1] + y])
-            direction = np.append(direction, theta)
+            
+            #if(x > self.control_point[0] or y > self.control_point[1]): break
+
+            # Robot controller didn't require direction information to function, 
+            # so the direction calculations provided in the paper were left to
+            # be implemented on a later date.
+            # theta = (self.angle / self.wheel_axis) * (theta**2)
+            direction = np.append(direction, 0)
+
         curve_path = np.array(curve_path)
         return curve_path, direction
 
-    def __calculate_line_step_size(self, curve_path) -> float:
-        """ Calculates the step size for the line segment before the clothoid 
-        curve.
-
-        """
-        if len(curve_path) > 2:
-            step = euler_distance(self.start[:-1], self.curve_start) / \
-                euler_distance(self.curve_start[0], curve_path[1][0])
-        else:
-            step = euler_distance(self.start[:-1], self.curve_start) / \
-                euler_distance(self.curve_start[0], self.intersection[0])
-
-        step = step * self.reduce_step
-        if step < 1:
-            step = 2
-        
-        return step
-
-    def __calculate_x_axis_line_segment(self, curve_path) -> tuple[list, list]:  
+    def __calculate_x_axis_line_segment(self) -> tuple[list, list]:  
         """ Calculates the line points on the x axis before the clothoid curve.
         """
-
         x_axis_line = []
         direction_x_line = np.array([])
-        step = self.__calculate_line_step_size(curve_path)
 
         # The last point of the line segment should not lay on top of the 
         # curve's first point so we offset it accordingly.
-        if len(curve_path) > 1:
-            end_of_line = [self.curve_start[0] - \
-                euler_distance(curve_path[0][0], curve_path[1][0]), \
-                    self.curve_start[1]]
-        else:
-            end_of_line = [self.curve_start[0] - self.max_dev, \
-                self.curve_start[1]]
-
-        for x in np.linspace(0, euler_distance(self.start[:-1], end_of_line), np.ceil(step)):
+        for x in np.linspace(0, self.curve_start[0]/2, np.ceil(self.points_on_straights/2)):
             x_axis_line.append([x, 0])
             direction_x_line = np.append(direction_x_line, 0)
 
@@ -142,43 +165,25 @@ class Clothoid:
     def __calculate_y_axis_line_segment(self, curve_path) -> tuple[list, list]:
         """ Calculates the line points on the y axis before the clothoid curve.
         """
-
-        y_axis_line = []
+        y_axis_points = []
         direction_y_line = np.array([])
-        step = self.__calculate_line_step_size(curve_path)
-        bisector = LinearEquation(self.intersection, self.finish)
-    
-        # The first point of the line segment should not lay on top of the 
-        # curve's last point so we offset it accordingly.
-        if self.angle < np.pi/2: 
-            sgn = -1.
-        elif self.angle == np.pi/2:
-            sgn = 0.
-        else:
-            sgn = +1.
+        s2_line = LinearEquation(self.intersection, self.finish)
 
-        if len(curve_path) > 2:
-            offset = sgn*euler_distance(curve_path[0][0], curve_path[1][0])
-            start_of_line = \
-                [curve_path[-1][0] + offset, curve_path[-1][1] + offset]
-        else:
-            offset = sgn*self.max_dev
-            start_of_line = \
-                [curve_path[-1][0] + offset, curve_path[-1][1] + offset]    
+        
+        clothoid_curve_last_point = curve_path[-1]
+        mid_y = (self.finish[1] - (self.finish[1] - clothoid_curve_last_point[1]) / 2) 
+        for y in np.linspace(mid_y, self.finish[1], np.ceil(self.points_on_straights/2)):
+            if s2_line.b != 0:
+                x = - (s2_line.b / s2_line.a) * y - (s2_line.c / s2_line.a)
+            else:
+                # Vertical line parallel to the y-axis
+                x = - (s2_line.c / s2_line.a)
 
-        if self.angle == np.pi/2:
-            for y in np.linspace(start_of_line[1], self.finish[1], np.floor(step)):
-                y_axis_line.append([-(bisector.c / bisector.a), y])
-                direction_y_line = np.append(direction_y_line, self.angle)
-        else: 
-            for x in np.linspace(start_of_line[0], self.finish[0], np.floor(step)):
-                y = - (bisector.a / bisector.b) * x - (bisector.c / bisector.b)
-                y_axis_line.append([x, y])
-                direction_y_line = np.append(direction_y_line, self.angle)
-        return np.array(y_axis_line), direction_y_line
+            y_axis_points.append([x, y])
+            direction_y_line = np.append(direction_y_line, self.angle)
+        return np.array(y_axis_points), direction_y_line
 
     def __mirror_direction(self, direction) -> list:
-        #theta_c = self.angle/2
         theta_c = (np.pi - self.angle)/2
         x_axis = LinearEquation([len(direction), theta_c], [len(direction)+1,  theta_c])
         mirror_x = []
@@ -214,39 +219,49 @@ class Clothoid:
         symmetrical_path = np.vstack([self.control_point, symmetrical_path])
         return symmetrical_path
 
-    def __curve_exceeded_finish(self, curve):
-        # TODO: rewrite?
-        return True if curve[-1][0] > self.finish[0] or \
-            curve[-1][1] > self.finish[1] else False
+    def __warnings(self, curve_path, complete_path):
+        """ Tries to warn the user about simple calculation errors that may occur from a given 
+        input. This module gives the user the freedom to experiment with different values in order 
+        to be tested in the simulation. For example, some max_dev values may give a correct clothoid
+        trajectory but may be impossible for the robot to follow with the current simulation 
+        settings. Please review the trajectories visually before executing.
+        """
+        complete_path = sorted(complete_path ,key=lambda l:l[1])
+        last_curve_point = curve_path[-1]
+        if last_curve_point[1] > self.finish[1]:
+            print('Warning: clothoid curve finish is past desired trajectory finish position.' + \
+                ' Removing extra points. Try decreasing max_dev.')
+            while complete_path[-1][1] > self.finish[1]:
+                complete_path.pop()
+        elif self.curve_start[0] < 0:
+            print('Warning: clothoid curve starts before starting position.' + \
+                ' Try decreasing max_dev.')
+        elif complete_path[-1][1] > self.finish[1]:
+            print('Warning: path exceeded finish. Removing extra points')
+            while complete_path[-1][1] > self.finish[1]:
+                complete_path.pop()
+
+        return complete_path
 
     def __calculate_clothoid(self) -> tuple[list, list]:
         """ Calculates the path and the direction of a trajectory that includes 
         a clothoid curve. 
         """
         left_curve_path, left_curve_direction = self.__calculate_curve_to_point_c()
-        x_line, x_line_direction = self.__calculate_x_axis_line_segment(left_curve_path)  
+        x_line, x_line_direction = self.__calculate_x_axis_line_segment()  
         right_curve_half = self.__calculate_symmetric_curve_segment(left_curve_path)
-        curve_path = np.vstack([left_curve_path, right_curve_half])
-        # if self.__curve_exceeded_finish(curve_path): 
-        #     print('Invalid input, clothoid exceeded trajectory finish.'\
-        #         + ' Try reducing max_dev.')
-        #     exit(-1)
-        
+        curve_path = np.vstack([left_curve_path, right_curve_half])        
         right_direction_half =  self.__mirror_direction(left_curve_direction)
         curve_direction = np.concatenate([left_curve_direction, right_direction_half])
 
         y_line, y_line_direction = self.__calculate_y_axis_line_segment(curve_path)  
-    
         path_wo_y_line = np.vstack([x_line, curve_path])
         complete_path = np.vstack([path_wo_y_line, y_line]) 
-        
+        #complete_path = curve_path
         direction_wo_y_line = np.append(x_line_direction, curve_direction)
         complete_direction = np.append(direction_wo_y_line, y_line_direction)
 
-        # print('path \n{}'.format(complete_path))
-        # # print('direction \n{}'.format(complete_direction))
-        # print('path {}'.format(len(complete_path)))
-        # print('direction {}'.format(len(complete_direction)))
+        complete_path = self.__warnings(curve_path, complete_path)
         return complete_path, complete_direction
 
     def __str__(self) -> str:
@@ -258,13 +273,21 @@ class Clothoid:
 
     def plot(self) -> None:
         plt.style.use('seaborn-whitegrid')
-
-        fig = plt.figure()
-        #ax = plt.subplot(1, 1, 1)
-
         plt.title('Clothoid Curve ')
         plt.xlabel("x-axis (m)")
         plt.ylabel("y-axis (m)")
+
+        # Visual limitations 
+        plt.xlim([-0.11, 0.11])
+        plt.ylim([-0.11, 0.11])
+        
+        robot_boundaries = plt.Circle((0 , 0), 0.025 , alpha=0.1, color='red')
+        camera_view_boundaries = plt.Rectangle((-0.05, -0.1), 0.1, 0.2, alpha=0.1, color='green')
+        plt.gca().add_artist(robot_boundaries)
+        plt.gca().add_artist(camera_view_boundaries)
+        ax = plt.gca()
+        ax.set_aspect('equal', adjustable='box')
+
         for item in self.path:
             plt.scatter(item[0], item[1], c='black')
         
@@ -274,24 +297,56 @@ class Clothoid:
 
         plt.scatter(self.control_point[0], self.control_point[1], c='m')
         plt.scatter(self.intersection[0], self.intersection[1], c='blue')
-        #plt.axis('scaled')
+        plt.annotate("P", (self.intersection[0], self.intersection[1]))
+        plt.scatter(self.start[0], self.start[1], c='red')
+        plt.scatter(self.finish[0], self.finish[1], c='green')
 
-        # plt.subplot(1, 2, 2)
-        # plt.plot(range(0, len(self.direction)), self.direction, \
-        #      linestyle='dashed', marker='o', c='lightcoral')
-        # plt.title('Direction')
-        # plt.xlabel("Number of clothoid point")
-        # plt.ylabel("Angle (deg)")
         plt.show()
 
 def test_main():
-    s1 = np.array([0., 0., 1])
-    p = np.array([0.02, 0., 1.])
-    s2 = np.array([0.03, 0.03, 1.])
-    # TODO: catch 180 deg case in a function that handles the user input.
-    c1 = Clothoid(s1, p, s2, max_dev=0.01, num_of_points=100)
-    print(c1.path)
-    print(np.degrees(c1.angle))
-    c1.plot()
+    # s1 = np.array([0., 0., 1])
+    # p = np.array([0.0, 0.05, 1.])
+    # s2 = np.array([0.05, 0.05, 1.])
+
+    # p_0 = np.array([0.05, 0.0, 1.])
+    # s2_0 = np.array([0.05, 0.05, 1.])
+    # calculate_trajectory(p_0, s2_0)
+
+    # p_1 = np.array([0.0, 0.05, 1.])
+    # s2_1 = np.array([-0.05, 0.05, 1.])
+    # calculate_trajectory(p_1, s2_1)
+
+    # p_1 = np.array([-0.05, 0.0, 1.])
+    # s2_1 = np.array([-0.05, -0.05, 1.])
+    # calculate_trajectory(p_1, s2_1)
+
+    # p_2 = np.array([0.0, -0.05, 1.])
+    # s2_2 = np.array([0.05, -0.05, 1.])
+    # calculate_trajectory(p_2, s2_2)
+
+    ####################################
+
+    # p_0_t = np.array([0.05, 0.0, 1.])
+    # s2_0_t = np.array([0.05, -0.05, 1.])
+    # calculate_trajectory(p_0_t, s2_0_t)
+
+    # p_1_t = np.array([0.0, 0.05, 1.])
+    # s2_1_t = np.array([0.05, 0.05, 1.])
+    # calculate_trajectory(p_1_t, s2_1_t)
+
+    # p_1_t = np.array([-0.05, 0.0, 1.])
+    # s2_1_t = np.array([-0.05, 0.05, 1.])
+    # calculate_trajectory(p_1_t, s2_1_t)
+
+    # p_2_t = np.array([0.0, -0.05, 1.])
+    # s2_2_t = np.array([-0.05, -0.05, 1.])
+    # calculate_trajectory(p_2_t, s2_2_t)
+
+    #######################################
+
+    p_2_t = np.array([0.03, -0.03, 1.])
+    s2_2_t = np.array([0.04, -0.09, 1.])
+    calculate_trajectory(p_2_t, s2_2_t)
+   
 if __name__ == '__main__':
     test_main()

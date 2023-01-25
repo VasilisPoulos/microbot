@@ -34,6 +34,34 @@ def angle_between_lines(point_a, intersection, point_b) -> float:
 def euler_distance(point_a, point_b) -> float:
     return np.linalg.norm(point_a - point_b)
 
+def affine_rotation(angle, point):
+
+    if len(point) == 3:
+        rotation = np.array([[math.cos(angle), - math.sin(angle), 0],
+                            [math.sin(angle),    math.cos(angle), 0],
+                            [0,                  0,               1]])
+    elif len(point) == 2:
+        rotation = np.array([[math.cos(angle), - math.sin(angle)],
+                            [math.sin(angle),    math.cos(angle)]])
+
+    new_point = np.matmul(rotation, point)
+    return new_point
+
+def affine_reflection(point, axis=1):
+    ''' -1 for y axis 1 for x
+    '''
+
+    if len(point) == 3:
+        reflection = np.array([ [axis, 0, 0],
+                                [0,-axis, 0],
+                                [0,    0, 1]])
+    elif len(point) == 2:
+        reflection = np.array([ [axis, 0],
+                                [0,-axis]])
+
+    new_point = np.matmul(reflection, point)
+    return new_point
+
 class LinearEquation:
     def __init__(self, point_a, point_b) -> None:
         self.starting_point = point_a

@@ -13,8 +13,8 @@
     <!-- Platform Friction -->
     <gazebo reference="platform_link">
         <material>Gazebo/Orange</material>
-        <mu1 value="0.2"/>
-        <mu2 value="0.2"/>
+        <mu1 value="0.3"/>
+        <mu2 value="0.3"/>
         <maxVel value="0"/>
         <minDepth value="0.001"/>
         <kd value="100"/> <!--  value of 100 is like dropping a block of wood on the ground -->
