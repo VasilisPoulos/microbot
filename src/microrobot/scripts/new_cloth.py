@@ -6,7 +6,8 @@ import scipy.special as sc
 import matplotlib.pyplot as plt
 from clothoids_math import *
 
-def calculate_trajectory(intersection, finish, view=True):
+def calculate_trajectory(intersection, finish, max_dev=0.003, points_on_curve=6, \
+    points_on_straights=4, view=True):
     '''
     Transform start, intersection (p) and finish to x-axis using affine transformations so that 
     the problem can be solved using the paper's theory.    
@@ -17,7 +18,7 @@ def calculate_trajectory(intersection, finish, view=True):
     angle_p = \
         - get_angle_between_points(start[0], start[1], intersection[0], intersection[1])
 
-    print('Angle: {}'.format(np.degrees(angle_p)))
+    # print('Angle: {}'.format(np.degrees(angle_p)))
 
     temp_p = [affine_rotation(angle_p, intersection)[:-2][0], 0., 1.]
     temp_finish = affine_rotation(angle_p, finish)
@@ -29,11 +30,11 @@ def calculate_trajectory(intersection, finish, view=True):
         reflected = True
 
     # Sanity check, see if point p is on x-axis.
-    print('Transformed Point P: {}'.format(temp_p))
-    print('Transformed Point F: {}'.format(temp_finish))
+    # print('Transformed Point P: {}'.format(temp_p))
+    # print('Transformed Point F: {}'.format(temp_finish))
 
     # 2. Calculate temp clothoid curve
-    c1 = Clothoid(start, temp_p, temp_finish, max_dev=0.003)
+    c1 = Clothoid(start, temp_p, temp_finish, max_dev, points_on_curve, points_on_straights)
     # c1.plot()
 
     # 3. Transform path back and plot
@@ -56,6 +57,8 @@ def calculate_trajectory(intersection, finish, view=True):
     if view:
         c1.plot()
 
+    return c1.path
+
 class Clothoid:
     """ Calculates right hand turn path and direction for a trajectory that 
     contains a clothoid curve.
@@ -69,15 +72,15 @@ class Clothoid:
     Every other case is deduced by symmetry.
     """
 
-    def __init__(self, start, intersection, finish, max_dev=0.1, \
-        wheel_axis=0.025) -> None:
+    def __init__(self, start, intersection, finish, max_dev=0.004, \
+        points_on_curve=6, points_on_straights=4, wheel_axis=0.025) -> None:
         self.start = start
         self.intersection = intersection
         self.finish = finish
         self.max_dev = max_dev
         self.wheel_axis = wheel_axis
-        self.points_on_curve = 6
-        self.points_on_straights = 4
+        self.points_on_curve = points_on_curve 
+        self.points_on_straights = points_on_straights
         self.vector_length = self.__calculate_vector_length()
         self.angle = self.__calculate_angle()
         self.characterizing_shape = self.__calculate_characterizing_shape()
@@ -128,7 +131,7 @@ class Clothoid:
         direction = np.array([])
         theta_c = (np.pi - self.angle) / 2
      
-        for theta in np.linspace(0, theta_c, self.points_on_curve):
+        for theta in np.linspace(0, theta_c, int(np.ceil(self.points_on_curve/2))):
             fresnel_variable = np.sqrt(2*theta/ np.pi)
             SF, CF  = sc.fresnel(fresnel_variable) 
 
@@ -155,7 +158,9 @@ class Clothoid:
 
         # The last point of the line segment should not lay on top of the 
         # curve's first point so we offset it accordingly.
-        for x in np.linspace(0, self.curve_start[0]/2, np.ceil(self.points_on_straights/2)):
+        # offset = euler_distance(self.curve_start, self.control_point)
+        for x in np.linspace(0, self.curve_start[0], self.points_on_straights)[:-1]:
+
             x_axis_line.append([x, 0])
             direction_x_line = np.append(direction_x_line, 0)
 
@@ -170,9 +175,12 @@ class Clothoid:
         s2_line = LinearEquation(self.intersection, self.finish)
 
         
-        clothoid_curve_last_point = curve_path[-1]
-        mid_y = (self.finish[1] - (self.finish[1] - clothoid_curve_last_point[1]) / 2) 
-        for y in np.linspace(mid_y, self.finish[1], np.ceil(self.points_on_straights/2)):
+        # clothoid_curve_last_point = curve_path[-1]
+        # mid_y = (self.finish[1] - (self.finish[1] - clothoid_curve_last_point[1]) / 2) 
+        # offset = euler_distance(self.curve_start, self.control_point)
+        curve_path = sorted(curve_path ,key=lambda l:l[1])
+        for y in np.linspace(curve_path[-1][1], self.finish[1], self.points_on_straights)[1:]:
+            
             if s2_line.b != 0:
                 x = - (s2_line.b / s2_line.a) * y - (s2_line.c / s2_line.a)
             else:
@@ -273,34 +281,46 @@ class Clothoid:
 
     def plot(self) -> None:
         plt.style.use('seaborn-whitegrid')
-        plt.title('Clothoid Curve ')
+        plt.title('Clothoid Path')
         plt.xlabel("x-axis (m)")
         plt.ylabel("y-axis (m)")
+
+        plt.rcParams['savefig.dpi'] = 500
+        plt.gcf().set_size_inches(8, 8)
 
         # Visual limitations 
         plt.xlim([-0.11, 0.11])
         plt.ylim([-0.11, 0.11])
         
-        robot_boundaries = plt.Circle((0 , 0), 0.025 , alpha=0.1, color='red')
-        camera_view_boundaries = plt.Rectangle((-0.05, -0.1), 0.1, 0.2, alpha=0.1, color='green')
-        plt.gca().add_artist(robot_boundaries)
-        plt.gca().add_artist(camera_view_boundaries)
+        view_boundaries = True
+        if view_boundaries:
+            robot_boundaries = plt.Circle((0 , 0), 0.025 , alpha=0.3, color='orange')
+            camera_view_boundaries = plt.Rectangle((-0.05, -0.1), 0.1, 0.2, alpha=0.1, color='dimgray')
+            plt.gca().add_artist(robot_boundaries)
+            plt.gca().add_artist(camera_view_boundaries)
+        
         ax = plt.gca()
         ax.set_aspect('equal', adjustable='box')
 
         for item in self.path:
             plt.scatter(item[0], item[1], c='black')
         
-        plt.annotate("start", (self.start[0], self.start[1]))
+        offset = 0.001
+        bisector = LinearEquation(self.intersection, self.control_point)
+        curve_finish = bisector.find_symmetrical_point_of(self.curve_start)
+        plt.annotate("start", (self.start[0] - offset, self.start[1] + offset))
+        plt.annotate("x0", (self.curve_start[0] - offset, self.curve_start[1] + offset))
+        plt.annotate("x1", (curve_finish[0] + offset/4, curve_finish[1] + offset/4))
+        plt.annotate("P", (self.intersection[0] + offset/2, self.intersection[1] + offset))
+        plt.annotate("finish", (self.path[-1][0] - offset, self.path[-1][1] + offset))
+        plt.annotate("C", (self.control_point[0] + offset, self.control_point[1] - offset))
 
-        plt.annotate("x0", (self.curve_start[0], self.curve_start[1]))
+        plt.scatter(self.control_point[0], self.control_point[1], c='m', s=100, alpha=0.6)
+        plt.scatter(self.intersection[0], self.intersection[1], c='blue', s=100, alpha=0.6)
+        plt.scatter(self.start[0], self.start[1], c='red', s=100, alpha=0.6)
+        plt.scatter(self.finish[0], self.finish[1], c='green', s=100, alpha=0.6)
 
-        plt.scatter(self.control_point[0], self.control_point[1], c='m')
-        plt.scatter(self.intersection[0], self.intersection[1], c='blue')
-        plt.annotate("P", (self.intersection[0], self.intersection[1]))
-        plt.scatter(self.start[0], self.start[1], c='red')
-        plt.scatter(self.finish[0], self.finish[1], c='green')
-
+        plt.tight_layout()
         plt.show()
 
 def test_main():
@@ -344,9 +364,9 @@ def test_main():
 
     #######################################
 
-    p_2_t = np.array([0.03, -0.03, 1.])
-    s2_2_t = np.array([0.04, -0.09, 1.])
-    calculate_trajectory(p_2_t, s2_2_t)
+    p_2_t = np.array([0.06, -0.03, 1.])
+    s2_2_t = np.array([0.06, 0.07, 1.])
+    _ = calculate_trajectory(p_2_t, s2_2_t, 0.01, 9, 4)
    
 if __name__ == '__main__':
     test_main()

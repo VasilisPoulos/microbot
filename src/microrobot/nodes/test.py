@@ -12,9 +12,9 @@ l_rpm = 1400.0
 r_rpm = -1400.0
 test_mode = 0
 benchmark_0 = 0
-benchmark_1 = 0
+benchmark_1 = 1
 benchmark_2_drive = 0
-benchmark_3_on_site = 1
+benchmark_3_on_site = 0
 controlled = 0
 
 def robot_pose(msg):
@@ -95,21 +95,26 @@ if __name__ == '__main__':
                     rate.sleep()
                 rospy.signal_shutdown('benchmark 0 done')
             elif benchmark_1:
+                
+                #drive(7640.0, 1, 20)
+                #turn(1400.0, 1400.0, 30)
+                rpm_test_list = [1150, 1200, 1250, 1300, 1350, 1400, 1450, 1500, 1550, 1600]
+                for rpm in rpm_test_list:
+                    turn(rpm, -1200, 20)
+                    rate.sleep()
+
                 rate.sleep()
-                drive(1500.0, 1, 8)
-                rotate(1700, 1, 20)
-                drive(1500.0, 1, 8)
                 rospy.signal_shutdown('benchmark 1 done')
             elif benchmark_2_drive:
-                rpm_test_list = [1100, 1200, 1300, 1350]
+                rpm_test_list = [1150, 1200, 1250, 1300, 1350, 1400, 1450, 1500, 1550, 1600]
                 for rpm in rpm_test_list:
-                    drive(rpm, 1, 7)
+                    drive(rpm, 1, 20)
                     rate.sleep()
                 rospy.signal_shutdown('benchmark 2 done')
             elif benchmark_3_on_site:
-                rpm_test_list = [1200, 1250, 1300, 1350]
+                rpm_test_list = [1200, 1250, 1300, 1350, 1400, 1450, 1500, 1550, 1600]
                 for rpm in rpm_test_list:
-                    rotate(rpm, 1, 10)
+                    rotate(rpm, 1, 20)
                     rate.sleep()
                 rospy.signal_shutdown('benchmark 3 done')
 

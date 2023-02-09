@@ -90,4 +90,7 @@
     <!-- Show in Rviz   -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find microrobot)/rviz/config.rviz"/>
 
+    <!-- Launch rqt -->
+    <node name="rqt_gui" pkg="rqt_gui" type="rqt_gui"/>
+
 </launch>
